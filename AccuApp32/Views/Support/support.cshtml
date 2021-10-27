@@ -1,0 +1,245 @@
+﻿@using WebDB
+@model Ticket;
+@{
+    Layout = "~/Views/Shared/_LayoutAdminLte.cshtml";
+
+    var vendorsList=(Dictionary<int,string>)ViewBag.VendorsList;
+}
+<style>
+    #tblTickets th {
+        vertical-align:top;
+        text-align:center;
+        background-color:blue;
+        color:white;
+    }
+</style>
+<!--user edit form-->
+<div class="modal fade" id="editTicket" tabindex="-1" role="dialog" aria-labelledby="ediTicketModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="ediTicketModalLabel">Edit Ticket</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form>
+            <div class="row">
+                <div class="form-group col-sm-3">
+                    <label for="txtTicketID" class="control-label">Ticket ID:</label>
+                    <input type="text" class="form-control" id="txtTicketID" name="txtTicketID" disabled />
+                </div>
+                <div class="form-group col-sm-6">
+                    <label for="txtEnteredBy" class="control-label">Entered by:</label>
+                    <input type="text" class="form-control" id="txtEnteredBy" name="txtEnteredBy" disabled/>
+                </div>
+            </div>
+            <div class="row">
+                <div class="form-group col-sm-3">
+                    <label for="txtDateEntered" class="control-label">Date entered</label>
+                    <input type="text" id="txtDateEntered" class="form-control" name="txtDateEntered" disabled/>
+                </div>
+                    <div class="form-group col-sm-3">
+                    <label for="lstTicketStatus" class="control-label">Ticket status:</label>
+                    <select class="form-control" id="lstTicketStatus" name="lstTicketStatus">
+                        <option value="">Select status...</option>
+                        <option value="0">New</option>
+                        <option value="1">In-Progress</option>
+                        <option value="2">Complete</option>
+                    </select>
+                    </div>
+                    <div class="form-group col-sm-3">
+                    <label for="lstTicketType" class="control-label">Ticket type:</label>
+                    <select class="form-control" id="lstTicketType">
+                        <option value="">Select type...</option>
+                        <option value="0">EMR Issue</option>
+                        <option value="1">Desktop Issue</option>
+                        <option value="2">Account Issue</option>
+                        <option value="3">Hardware Issue</option>
+                        <option value="4">Portal Issue</option>
+                        <option value="5">Auto-Print Issue</option>
+                        <option value="6">LIS Issue</option>
+                        <option value="7">Unknown</option>
+                    </select>
+                    </div>
+                </div>
+          <div class="row">
+              <div class="form-group col-sm-6">
+                <label for="txtAdditionalContactInfo" class="control-label">Additional contact info:</label>
+                <textarea rows="2" class="form-control" id="txtAdditionalContactInfo" name="txtAdditionalContactInfo" ></textarea>
+              </div>
+              <div class="form-group col-sm-6">
+                <label for="txtTicketDescription" class="control-label">Ticket description:</label>
+                <textarea rows="2" class="form-control" id="txtTicketDescription" name="txtTicketDescription"></textarea>
+              </div>
+          </div>
+          <div class="row">
+              <div class="form-group col-sm-3">
+                <label for="lstVendor" class="control-label">Vendor id:</label>
+                <select class="form-control" id="lstVendors" >
+                    <option value="">Select vendor...</option>
+                    @foreach(var v in vendorsList)
+                    {
+                       <option value="@v.Key">@v.Value</option>
+                    }
+                </select>
+              </div>
+              <div class="form-group col-sm-4">
+                <label for="AccountId" class="control-label">Account Id:</label>
+                <select id="AccountId" class="form-control ui fluid search dropdown">
+                    <option value="">Select account...</option>
+                </select>               
+              </div>
+              <div class="form-group col-sm-5">
+                <label for="txtExamples" class="control-label">Examples:</label>
+                <input class="form-control" id="txtExamples" />
+              </div>
+          </div>
+          <div class="row">
+            <div class="form-group col-sm-12">
+                <label for="txtActionTaken" class="control-label">Action taken:</label>
+                <input type="text" class="form-control" id="txtActionTaken" name="txtActionTaken"/>
+            </div>
+          </div>
+          <div class="row">
+            <div class="form-group col-sm-12">
+                <table class="table" id="tblActionHistory">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Action by</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+          </div>
+          <div class="row">
+              <div class="form-group col-sm-6">
+                <table class="table" id="tblTicketContacts">
+                    <thead>
+                        <tr>
+                            <th>
+                                
+                            </th>
+                            <th>
+                                  Contact email  
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+                <div class="row">
+                        <div class="col-md-2">
+                            <button id="btnAddTicketContact" class="btn btn-default">Add</button>
+                        </div>
+                        <div class="col-md-2">
+                            <button id="btnRemoveTicketContact" class="btn btn-danger">Remove</button>
+                        </div>
+                    </div>
+                </div>
+              <div class="form-group col-sm-6">
+                    <table class="table" id="tblTicketAttachments">
+                        <thead>
+                            <tr>
+                                <th></th>
+                                <th>
+                                    Attachment Name
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                    <div class="row">
+                        <div class="col-md-2">
+                            <button id="btnAddTicketAttachment" class="btn btn-default">Add</button>
+                        </div>
+                        <div class="col-md-2">
+                            <button id="btnRemoveTicketAttachment" class="btn btn-danger">Remove</button>
+                        </div>
+                    </div>
+                </div>
+           </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" id="btnSave">Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!--END user edit form-->
+<br/>
+<br/>
+<button id="btnCreate" class="btn btn-secondary">Create new ticket</button>
+<br/>
+<br/>
+<div class="row">
+    <div class="col-sm-3">
+        <span>Status:</span>
+        <select id="lstStatus" class="form-control" >
+            <option value="">Select status...</option>
+            <option value="0">New</option>
+            <option value="1">In-Progress</option>
+            <option value="2">Complete</option>
+        </select>
+    </div>
+    <div class="col-sm-3">
+        <span>Ticket Type:</span>
+        <select id="lstType" class="form-control" >
+            <option value="">Select type...</option>
+            <option value="0">EMR Issue</option>
+            <option value="1">Desktop Issue</option>
+            <option value="2">Account Issue</option>
+            <option value="3">Hardware Issue</option>
+            <option value="4">Portal Issue</option>
+            <option value="5">Auto-Print Issue</option>
+            <option value="6">LIS Issue</option>
+            <option value="7">Unknown</option>
+        </select>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-sm3">
+        <table id="tblTickets" class="table table-striped table-bordered dataTable compact">
+            <thead>
+                <tr>
+                    <th>Ticket ID</th>
+                    <th>Ticket Status</th>
+                    <th>Ticket Type</th>
+                    <th>Account ID</th>
+                    <th>Name</th>
+                    <th>Entered By</th>
+                    <th>Additional Contact Info</th>
+                    <th>Date Entered</th>
+                    <th>Last Modified</th>
+                    <th></th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tfoot>
+                <tr>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+</div>
+<script src="~/Ticket/Ticket.js" ></script>

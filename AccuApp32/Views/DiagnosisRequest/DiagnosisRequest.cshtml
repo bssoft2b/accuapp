@@ -1,0 +1,328 @@
+﻿@{
+    Layout = "~/Views/Shared/_LayoutAdminLte.cshtml";
+}
+<style>
+    #tblAccountRequests th {
+        vertical-align:top;
+        font-size:smaller;
+    }
+    #tblAccountRequests td {
+        vertical-align:top;
+        font-size:smaller;
+    }
+    #frmAccountDetails div.modal-lg {
+    max-width: 80% !important;
+}
+ #tblDiagnosisRequests  th {
+     font-size:smaller;
+ }
+ #tblDiagnosisRequests  td {
+     font-size:smaller;
+ }
+    #frmDiagnosisReq div.modal-lg {
+    max-width: 60% !important;
+}
+</style>
+<!--Edit form-->
+<div class="modal fade" id="frmAccountDetails" tabindex="-1" role="dialog" aria-labelledby="frmAccountDetailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="frmAccountDetailsModalLabel">Details</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                </button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="form-group row">
+                        <div class="col-sm-4">
+                            <label for="txtAccountID" class="col-form-label">AccountID:</label>
+                            <input type="text" class="form-control" id="txtAccountID" readonly/>
+                        </div>
+                        <div class="col-sm-4">
+                            <label for="txtName" class="col-form-label">Name:</label>
+                            <input type="text" class="form-control" id="txtName" readonly />
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-sm-4">
+                            <label for="txtAddress" class="col-form-label">Address:</label>
+                            <input type="text" class="form-control" id="txtAddress" readonly />
+                        </div>
+                        <div class="col-sm-4">
+                            <label for="txtTelephone" class="col-form-label">Telephone:</label>
+                            <input type="text" class="form-control" id="txtTelephone" readonly />
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-sm-4">
+                            <label for="txtGroupID" class="col-form-label">GroupID:</label>
+                            <input type="text" class="form-control" id="txtGroupID" readonly />
+                        </div>
+                        <div class="col-sm-4">
+                            <label for="txtSubGroup" class="col-form-label">SubGroup:</label>
+                            <input type="text" class="form-control" id="txtSubGroup" readonly />
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-md-12">
+                            <table class="table" id="tblDiagnosisRequests">
+                                <thead>
+                                    <tr>
+                                        <th>DiagnosisRequestID</th>
+                                        <th>PhysicianID</th>
+                                        <th>AccountID</th>
+                                        <th>AccessionNumber</th>
+                                        <th>FirstName</th>
+                                        <th>LastName</th>
+                                        <th>DOB</th>
+                                        <th>RequestDate</th>
+                                        <th>LastPrinted</th>
+                                        <th>LastPrintedBy</th>
+                                        <th></th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <th>DiagnosisRequestID</th>
+                                        <th>PhysicianID</th>
+                                        <th>AccountID</th>
+                                        <th>AccessionNumber</th>
+                                        <th>FirstName</th>
+                                        <th>LastName</th>
+                                        <th>DOB</th>
+                                        <th>RequestDate</th>
+                                        <th>LastPrinted</th>
+                                        <th>LastPrintedBy</th>
+                                        <th></th>
+                                        <th></th>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" id="btnCreateOk" class="btn btn-primary">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!--End edit form-->
+<!--Edit form-->
+<div class="modal fade" id="frmDiagnosisReq" tabindex="-1" role="dialog" aria-labelledby="frmDiagnosisReqModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="frmDiagnosisReqModalLabel">Details</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                </button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="form-group row">
+                        <div class="col-sm-2">
+                            <label for="txtDiagnosisRequestID1" class="col-form-label">DiagnosisRequestID:</label>
+                            <input type="text" class="form-control" id="txtDiagnosisRequestID1" readonly/>
+                        </div>
+                        <div class="col-sm-2">
+                            <label for="txtAccountID1" class="col-form-label">AccountID:</label>
+                            <input type="text" class="form-control" id="txtAccountID1" readonly />
+                        </div>
+                        <div class="col-sm-2">
+                            <label for="txtName1" class="col-form-label">Name:</label>
+                            <input type="text" class="form-control" id="txtName1" readonly />
+                        </div>
+                        <div class="col-sm-2">
+                            <label for="txtAddress1" class="col-form-label">Address:</label>
+                            <input type="text" class="form-control" id="txtAddress1" readonly />
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-sm-2">
+                            <label for="txtTelephone1" class="col-form-label">Telephone:</label>
+                            <input type="text" class="form-control" id="txtTelephone1" readonly />
+                        </div>
+                        <div class="col-sm-2">
+                            <label for="txtPhysicianID1" class="col-form-label">PhysicianID:</label>
+                            <input type="text" class="form-control" id="txtPhysicianID1" readonly />
+                        </div>
+                        <div class="col-sm-2">
+                            <label for="txtName2" class="col-form-label">Name:</label>
+                            <input type="text" class="form-control" id="txtName2" readonly />
+                        </div>
+                        <div class="col-sm-2">
+                            <label for="txtNPI1" class="col-form-label">NPI:</label>
+                            <input type="text" class="form-control" id="txtNPI1" readonly />
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-sm-2">
+                            <label for="txtAccessionNumber1" class="col-form-label">AccessionNumber:</label>
+                            <input type="text" class="form-control" id="txtAccessionNumber1" readonly />
+                        </div>
+                        <div class="col-sm-2">
+                            <label for="txtServiceDate1" class="col-form-label">ServiceDate:</label>
+                            <input type="text" class="form-control" id="txtServiceDate1" readonly />
+                        </div>
+                        <div class="col-sm-2">
+                            <label for="txtRequestDate1" class="col-form-label">RequestDate:</label>
+                            <input type="text" class="form-control" id="txtRequestDate1" readonly />
+                        </div>
+                        <div class="col-sm-2">
+                            <label for="txtFirstName1" class="col-form-label">FirstName:</label>
+                            <input type="text" class="form-control" id="txtFirstName1" readonly />
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-sm-2">
+                            <label for="txtLastName1" class="col-form-label">LastName:</label>
+                            <input type="text" class="form-control" id="txtLastName1" readonly />
+                        </div>
+                        <div class="col-sm-2">
+                            <label for="txtDOB1" class="col-form-label">DOB:</label>
+                            <input type="text" class="form-control" id="txtDOB1" readonly />
+                        </div>
+                    </div>
+
+                    <label class="form-control-label">
+                        Below are the ordered tests that are missing diagnosis codes, along with their respective sets of commonly used diagnosis codes.
+                    </label>
+                    <div class="row">
+                        <table class="table" id="tblDiagnosisRequestLines">
+                            <thead>
+                                <tr>
+                                    <th>
+                                        UncoveredCode
+                                    </th>
+                                    <th>
+                                        CommonlyUsedDiagnoses
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <label class="form-control-label">
+                        Below are the previously provided Icd-10 codes, that were denied.
+                    </label>
+                    <div class="row">
+                        <table class="table" id="tblDiagnosisHistoryLines">
+                            <thead>
+                                <tr>
+                                    <th>
+                                        Code
+                                    </th>
+                                    <th>
+                                        Description
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="row">
+                        <hr />
+                        <label class="form-control-label">Please designate the diagnosis codes that accurately reflect the patient's condition according to your best medical judgement.</label>
+                        <div class="col-sm-8">
+                            <table id="tblAddCodeList" class="table">
+                                <thead>
+                                    <tr>
+                                        <th>
+                                            Code
+                                        </th>
+                                        <th>
+                                            Description
+                                        </th>
+                                        <th>
+
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="col-sm-4">
+                            <label class="form-control-label">Add Code (input search string and press Enter key, and see below dropdown)</label>
+                            <input id="txtCodeSearch" class="form-control"/>
+                            <select id="selectCodeList" class="form-control">
+                            </select>
+                        </div>
+                    </div>
+                    <hr/>
+                    <label class="form-control-label" id="signingTitleText"></label>
+                    <input type="hidden" name="ElectronicSign" id="esign"/>
+                    <div class="row">
+                            <canvas style="border:1px solid #000000; width: 100%; height: 200px;" id="signature-pad" class="signature-pad"></canvas>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <button type="button" class="btn btn-default" id="Clear">Clear</button>
+                                </div>
+                            </div>
+                        </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" id="btnCreateOk1" class="btn btn-primary">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!--End edit form-->
+
+<table id="tblAccounts" class="table table-striped table-bordered dataTable">
+    <thead>
+        <tr>
+            <th>AccountID</th>
+            <th>Name</th>
+            <th>GroupID</th>
+            <th>SubGroup</th>
+            <th>Telephone</th>
+            <th>OpenCount</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tfoot>
+        <tr>
+            <th>AccountID</th>
+            <th>Name</th>
+            <th>GroupID</th>
+            <th>SubGroup</th>
+            <th>Telephone</th>
+            <th>OpenCount</th>
+            <th></th>
+        </tr>
+    </tfoot>
+</table>
+<!--end dispatch tasks-->
+<script src="https://cdn.jsdelivr.net/npm/signature_pad@2.3.2/dist/signature_pad.min.js"></script>
+<script src="~/DiagnosisRequest/diagnosisrequest.js">
+</script>
+<script>
+    var canvas = $("#signature-pad").get(0);
+    function resizeCanvas() {
+        var ratio = Math.max(window.devicePixelRatio || 1, 1);
+        canvas.width = canvas.offsetWidth * ratio;
+        canvas.height = canvas.offsetHeight * ratio;
+        canvas.getContext("2d").scale(ratio, ratio);
+    }
+    resizeCanvas();
+</script>

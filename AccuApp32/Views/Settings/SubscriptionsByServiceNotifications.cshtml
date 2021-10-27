@@ -1,0 +1,73 @@
+﻿@model AccuApp32MVC.Models.ServiceNotificationView
+@{
+    Layout = "~/Views/Shared/_LayoutAdminLte.cshtml";
+}
+
+<style>
+    body {
+        overflow-x: scroll;
+        overflow-y: scroll;
+    }
+
+    th {
+        background-color: grey;
+        color: white;
+        text-align: center;
+        vertical-align: bottom;
+        height: 300px;
+        padding-bottom: 3px;
+        padding-left: 5px;
+        padding-right: 5px;
+    }
+
+    .verticalText {
+        text-align: left;
+        vertical-align: top;
+        width: 20px;
+        margin: 0px;
+        padding: 0px;
+        padding-left: 3px;
+        padding-right: 3px;
+        padding-top: 10px;
+        white-space: nowrap;
+        -webkit-transform: rotate(-90deg);
+        -moz-transform: rotate(-90deg);
+    }
+</style>
+<br />
+<br />
+<table id="subscribeServiceNotification">
+    <thead>
+        <tr>
+            <th></th>
+            @foreach (var n in Model.Notifications)
+            {
+        <th>
+            <div class="verticalText">@n.Name</div><br />
+        </th>
+            }
+        </tr>
+    </thead>
+    <tbody>
+        @{
+            var i = 0;
+        }
+        @foreach (var u in Model.ServiceEmails)
+        {
+            i++;
+            <tr style="background-color:@(i%2==0?"lightgray":"white")">
+                <td>@u.Email</td>
+                @foreach (var n in Model.Notifications)
+                {
+                    var subscribed = Model.ServiceNotifications.Any(t => t.Email == u.Email && t.NotificationId == n.NotificationId);
+                    <td>
+                        <input class="subscribe-serviceemail-checkbox" type="checkbox" @(subscribed ? "checked":"") email="@u.Email" notificationId="@n.NotificationId" />
+                    </td>
+                }
+            </tr>
+        }
+    </tbody>
+</table>
+
+
+

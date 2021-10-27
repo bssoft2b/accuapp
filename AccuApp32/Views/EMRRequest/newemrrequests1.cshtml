@@ -1,0 +1,540 @@
+﻿
+@{
+    Layout = "~/Views/Shared/_LayoutAdminLte.cshtml";
+
+    var Accounts = (Dictionary<int, string>)ViewBag.AccountList;
+    var Vendors = (Dictionary<int, string>)ViewBag.VendorList;
+}
+<style>
+    #tblEMRRequests th {
+        vertical-align:top;
+        font-size:smaller;
+        text-align:center;
+        background-color:blue;
+        color:white;
+    }
+
+    #tblEMRRequests td {
+        vertical-align:top;
+        font-size:smaller;
+    }
+</style>
+<!--Edit form-->
+<div class="modal fade" id="frmEMRRequest" tabindex="-1" role="dialog" aria-labelledby="frmEMRRequestModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="frmEMRRequestModalLabel">Create</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form method="post">
+                    <div class="row">
+                    <div class="col-sm-6">
+                    <input type="hidden" id="txtEmrRequestID" />
+                    <div class="form-group col-sm-8">
+                        <label for="lstStatus" class="control-label">Status</label>
+                        <select id="lstStatus" class="form-control" required>
+                            <option value="0">In Process</option>
+                            <option value="1">Testing</option>
+                            <option value="2">Denied</option>
+                            <option value="3">Canceled</option>
+                            <option value="4">Live</option>
+                            <option value="5">Disconnected</option>
+                            <option value="6">On Hold</option>
+                            <option value="7">New</option>
+                            <option value="8">Pending Quote Retrival</option>
+                            <option value="9">Quote Approved</option>
+                            <option value="8">Quote Requested</option>
+                        </select>
+                        <input type="hidden" id="txtVendorName" />
+                    </div>
+                    <div class="form-group col-sm-10">
+                        <label for="lstAccountID" class="control-label">Account ID</label>
+                        <select id="lstAccountID" class="form-control" required>
+                            <option></option>
+                            @foreach (var account in Accounts)
+                            {
+                                <option value="@account.Key">@account.Value </option>
+                            }
+                        </select>
+                        <input type="hidden" id="txtVendorName" />
+                    </div>
+                    <div class="form-group col-sm-8">
+                        <label for="txtOfficeManagerName" class="control-label">Office Manager Name</label>
+                        <input id="txtOfficeManagerName" class="form-control"  required />
+                    </div>
+                    <div class="form-group col-sm-8">
+                        <label for="txtOfficeManagerEmail" class="control-label">Office Manager Email</label>
+                        <input id="txtOfficeManagerEmail" class="form-control"  />
+                    </div>
+                    <div class="form-group col-sm-8">
+                        <label for="txtOfficeManagerPhone" class="control-label">Office Manager Phone</label>
+                        <input id="txtOfficeManagerPhone" class="form-control" required />
+                    </div>
+                    <div class="form-group col-sm-8">
+                        <label for="txtPhysicianName" class="control-label">Physician Name</label>
+                        <input id="txtPhysicianName" class="form-control" />
+                    </div>
+                    <div class="form-group col-sm-8">
+                        <label for="txtPhysicianSpecialty" class="control-label">Physician Specialty</label>
+                        <input id="txtPhysicianSpecialty" class="form-control" required />
+                    </div>
+                    <div class="form-group col-sm-8">
+                        <label for="txtExpectedSpecimenCount" class="control-label">Expected Specimen Count</label>
+                        <input id="txtExpectedSpecimenCount" class="form-control"  required />
+                    </div>
+                    <div class="form-group col-sm-8">
+                        <label for="lstHasCustomPanels" class="control-label">Has Custom Panels</label>
+                        <select id="lstHasCustomPanels" class="form-control" required>
+                            <option></option>
+                            <option value=true>Yes</option>
+                            <option value=false>No</option>
+                        </select>
+                    </div>
+                    <div class="form-group col-sm-8" style="display:none">
+                        <label for="txtCustomPanels" class="control-label">Custom Panels</label>
+                        <input id="txtCustomPanels" class="form-control" required />
+                    </div>
+                    <div class="form-group col-sm-8">
+                        <label for="lstVendorID" class="control-label">Vendor</label>
+                        <select id="lstVendorID" class="form-control" required>
+                            <option></option>
+                            <option value=-1>New Vendor</option>
+                            @foreach (var vendor in Vendors)
+                            {
+                                <option value="@vendor.Key">@vendor.Value</option>
+
+                            }
+
+                        </select>
+                    </div>
+                    <div class="form-group col-sm-8">
+                        <label for="txtVendorContact" class="control-label">Vendor Contract</label>
+                        <input id="txtVendorContact" class="form-control"  required />
+                    </div>
+                    <div class="form-group col-sm-8">
+                        <label for="txtVendorPhone" class="control-label">Vendor Phone</label>
+                        <input for="txtVendorPhone" class="form-control"  required />
+                    </div>
+                    <div class="form-group col-sm-8">
+                        <label for="txtVendorFax" class="control-label">Vendor Fax</label>
+                        <input id="txtVendorFax" class="form-control"  />
+                    </div>
+                    <div class="form-group col-sm-8">
+                        <label for="txtVendorEmail" class="control-label">Vendor Email</label>
+                        <input id="txtVendorEmail" class="form-control"  required />
+                    </div>
+                    </div>
+                    <div class="col-sm-6">
+                    <input id="txtRequestedBy" type="hidden" />
+                    <div class="form-group col-sm-8">
+                        <label for="lstConnectionType" class="control-label">Connection Type</label>
+                        <select id="lstConnectionType" class="form-control" required>
+                            <option></option>
+                            <option value="Uni-Directional">Uni-Directional</option>
+                            <option value="Bi-Directional"> Bi-Directional</option>
+                            <option value="Demographic Bridge">Demographic Bridge</option>
+                        </select>
+                    </div>
+                    <div class="form-group col-sm-8">
+                        <label for="txtVendorEmail" class="control-label">Vendor Email</label>
+                        <input id="txtVendorEmail" class="form-control"  required />
+                    </div>
+                    <div class="form-group col-sm-8">
+                        <label for="txtVendorInstallationCost" class="control-label">Vendor Installation Cost</label>
+                        <input id="txtVendorInstallationCost" class="form-control"  required />
+                    </div>
+                    <div class="form-group col-sm-8">
+                        <label for="txtVendorAnnualCost" class="control-label">Vendor Annual Cost</label>
+                        <input id="txtVendorAnnualCost" class="form-control"  required />
+                    </div>
+                    <div class="form-group col-sm-8">
+                        <label for="txtComtronInstallationCost" class="control-label">Comtron Installation Cost</label>
+                        <input id="txtComtronInstallationCost" class="form-control"  required />
+                    </div>
+                    <div class="form-group col-sm-8">
+                        <label for="chkPOSent" class="control-label">POSent</label>
+                        <input id="chkPOSent" type="checkbox"  />
+                    </div>
+                    <div class="form-group col-sm-8">
+                        <label for="chkLISRequestSent" class="control-label">LISRequestSent</label>
+                        <input id="chkLISRequestSent" type="checkbox"  />
+                    </div>
+                    <div class="form-group col-sm-8">
+                        <label for="txtProjectedLiveDate" class="control-label">Projected Live Date</label>
+                        <input id="txtProjectedLiveDate" type="date" class="form-control"  required />
+                    </div>
+                    <div class="form-group col-sm-8">
+                        <label for="txtActualLiveDate" class="control-label">Actual Live Date</label>
+                        <input id="txtActualLiveDate" type="date" class="form-control"  required />
+                    </div>
+                    <div class="form-group col-sm-8">
+                        <label for="txtComtronTerminationDate" class="control-label">Comtron Termination Date</label>
+                        <input id="txtComtronTerminationDate" type="date" class="form-control"  required />
+                    </div>
+                    <div class="form-group col-sm-8">
+                        <label for="txtVendorTerminationDate" class="control-label">Vendor Termination Date</label>
+                        <input id="txtVendorTerminationDate" type="date" class="form-control"  required />
+                    </div>
+                    <div class="form-group col-sm-8">
+                        <label for="chkApprove" class="control-label">Approve</label>
+                        <input type="checkbox" id="chkApprove" />
+                    </div>
+                    <div class="form-group col-sm-8">
+                        <label for="txtActionTaken" class="control-label">Action Taken</label>
+                        <input id="txtActionTaken" class="form-control"  required />
+                    </div>
+                    <div class="form-group col-sm-12">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Action Taken</th>
+                                    <th>Action By</th>
+                                    <th>Action Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                        </table>
+                    </div>
+                    <input id="txtRequestStatus" type="hidden" />
+                    <input id="txtRequestedDate" type="hidden" />
+                    </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" id="btnSave" class="btn btn-primary">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!--End edit form-->
+<!--Details-->
+<div class="modal fade" id="frmEMRRequestDetails" tabindex="-1" role="dialog" aria-labelledby="frmEMRRequestDetailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="frmEMRRequestDetailsModalLabel">Details</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <table class="table">
+                    <input type="hidden" id="EMRRequestID" />
+                    <tr>
+                        <td>
+                            OfficeManagerName
+                        </td>
+                        <td>
+                            <label id="lblOfficeManagerName"></label> 
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            OfficeManagerEmail
+                        </td>
+                        <td>
+                            <label id="lblOfficeManagerEmail"></label> 
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            OfficeManagerPhone
+                        </td>
+                        <td>
+                            <label id="lblOfficeManagerPhone"></label> 
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            PhysicianName
+                        </td>
+                        <td>
+                            <label id="lblPhysicianName"></label> 
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            PhysicianSpecialty
+                        </td>
+                        <td>
+                            <label id="lblPhysicianSpecialty"></label> 
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            ExpectedSpecimenCount
+                        </td>
+                        <td>
+                            <label id="lblExpectedSpecimenCount"></label> 
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            CustomPanels
+                        </td>
+                        <td>
+                            <label id="lblCustomPanels"></label> 
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            Vendor
+                        </td>
+                        <td>
+                            <label id="lblVendor"></label> 
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            VendorContact
+                        </td>
+                        <td>
+                            <label id="lblVendorContact"></label> 
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            VendorPhone
+                        </td>
+                        <td>
+                            <label id="lblVendorPhone"></label> 
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            VendorFax
+                        </td>
+                        <td>
+                            <label id="lblVendorFax"></label> 
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            VendorEmail
+                        </td>
+                        <td>
+                            <label id="lblVendorEmail"></label> 
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            ConnectionType
+                        </td>
+                        <td>
+                            <label id="lblConnectionType"></label> 
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            RequestedBy
+                        </td>
+                        <td>
+                            <label id="lblRequestedBy"></label> 
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            RequestedDate
+                        </td>
+                        <td>
+                            <label id="lblRequestedDate"></label> 
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            VendorInstallationCost
+                        </td>
+                        <td>
+                            <label id="lblVendorInstallationCost"></label> 
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            VendorMaintenanceCost
+                        </td>
+                        <td>
+                            <label id="lblVendorMaintenanceCost"></label> 
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            VendorAnnualCost
+                        </td>
+                        <td>
+                            <label id="lblVendorAnnualCost"></label> 
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            ComtronInstallationCost
+                        </td>
+                        <td>
+                            <label id="lblComtronInstallationCost"></label> 
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            RequestStatus
+                        </td>
+                        <td>
+                            <label id="lblRequestStatus"></label> 
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            DenialReason
+                        </td>
+                        <td>
+                            <label id="lblDenialReason"></label> 
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            POSent
+                        </td>
+                        <td>
+                            <input id="chkPOSent" type="checkbox" class="disabled" disabled />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            LISRequestSent
+                        </td>
+                        <td>
+                            <input id="chkLISRequestSent" type="checkbox" class="disabled" disabled />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            ProjectedLiveDate
+                        </td>
+                        <td>
+                            <label id="lblProjectedLiveDate"></label> 
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            ActualLiveDate
+                        </td>
+                        <td>
+                            <label id="lblActualLiveDate"></label> 
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            ComtronTerminationDate
+                        </td>
+                        <td>
+                            <label id="lblComtronTerminationDate"></label> 
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            VendorTerminationDate
+                        </td>
+                        <td>
+                            <label id="lblVendorTerminationDate"></label> 
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            Account
+                        </td>
+                        <td>
+                            <label id="lblAccountID"></label> 
+                        </td>
+                    </tr>
+                </table>
+                <table class="table">
+                    <tr>
+                        <th>
+                            Action Taken
+                        </th>
+                        <th>
+                            Action By
+                        </th>
+                        <th>
+                            Action Date
+                        </th>
+                    </tr>
+                </table>      
+            </div>
+            <div class="form-group col-sm-8" id="divQuote" style="visibility:hidden">
+                <input type='hidden' id="fileContent"/><input type='hidden' id="fileName" /><input type='file' class="col-sm-6" onchange='passValues(this);'/>
+            </div>
+           <div class="form-group col-sm-4" id="divApprove" style="visibility:hidden">
+                <label for="Approved" class="control-label">Approve action:</label>
+                <select id="Approved" required class="form-control" required>
+                    <option></option>
+                    <option value="true">Approved</option>
+                    <option value="false">Denied</option>
+                </select>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" id="btnQuote" class="btn btn-primary">Quote</button>
+                <button type="button" id="btnApprove" class="btn btn-primary">Approve</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!--end details-->
+Request status:
+<select id="lstRequestStatus" class="form-control col-sm-2 select-chosen" multiple>
+    <option value="0">In Process</option>
+    <option value="1">Testing</option>
+    <option value="2">Denied</option>
+    <option value="3">Canceled</option>
+    <option value="4">Live</option>
+    <option value="5">Disconnected</option>
+    <option value="6">On Hold</option>
+    <option value="7">New</option>
+    <option value="8">Pending Quote Retrival</option>
+    <option value="9">Quote Approved</option>
+    <option value="8">Quote Requested</option>
+</select>
+<br />
+<br />
+<button type="button" class="btn btn-secondary" id="btnCreateNew">Create New</button>
+<br />
+<br />
+<table id="tblEMRRequests" class="table table-striped table-bordered dataTable">
+    <thead>
+        <tr>
+            <th>Requested Date</th>
+            <th>Status</th>
+            <th>Account ID</th>
+            <th>Account Name</th>
+            <th>Vendor</th>
+            <th>Connection Type</th>
+            <th>Requested By</th>
+            <th></th>
+            <th></th>
+            <th></th>
+        </tr>
+    </thead>
+    <tfoot>
+        <tr>
+            <th>Requested Date</th>
+            <th>Status</th>
+            <th>Account ID</th>
+            <th>Account Name</th>
+            <th>Vendor</th>
+            <th>Connection Type</th>
+            <th>Requested By</th>
+            <th></th>
+            <th></th>
+            <th></th>
+        </tr>
+    </tfoot>
+</table>
+<!--end dispatch tasks-->
+<script src="~/EMRRequest/NewEMRRequest1.js">
+</script>

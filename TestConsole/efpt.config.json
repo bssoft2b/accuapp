@@ -1,0 +1,39 @@
+﻿{
+   "ContextClassName": "FINANCEContext",
+   "ContextNamespace": null,
+   "DefaultDacpacSchema": null,
+   "FilterSchemas": false,
+   "IncludeConnectionString": true,
+   "ModelNamespace": null,
+   "OutputContextPath": "Finance",
+   "OutputPath": "Finance",
+   "ProjectRootNamespace": "TestConsole",
+   "Schemas": null,
+   "SelectedHandlebarsLanguage": 0,
+   "SelectedToBeGenerated": 0,
+   "Tables": [
+      {
+         "HasPrimaryKey": true,
+         "Name": "[dbo].[ReportRowStatus]",
+         "ObjectType": 0
+      },
+      {
+         "HasPrimaryKey": true,
+         "Name": "[dbo].[ReportRowStatusDetail]",
+         "ObjectType": 0
+      },
+      {
+         "HasPrimaryKey": true,
+         "Name": "[dbo].[ReportSettings]",
+         "ObjectType": 0
+      }
+   ],
+   "UseDatabaseNames": true,
+   "UseDbContextSplitting": false,
+   "UseFluentApiOnly": false,
+   "UseHandleBars": false,
+   "UseInflector": true,
+   "UseLegacyPluralizer": false,
+   "UseNodaTime": false,
+   "UseSpatial": false
+}

@@ -1,0 +1,177 @@
+﻿@model WebDB.AccountRequestViewModel
+
+@{
+
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AccountRequest- AccuApp</title>
+    <style>
+        table {
+            border-collapse: collapse;
+        }
+
+        th {
+            border-left: 1px solid black;
+            padding: 4px
+        }
+
+        td {
+            border-left: 1px solid black;
+            padding: 4px;
+        }
+    </style>
+
+    <environment include="Development">
+            <link rel="stylesheet" href="file:\\\C:\inetpub\wwwroot\wwwroot\lib/bootstrap/dist/css/bootstrap.css" />
+            <link rel="stylesheet" href="file:\\\C:\inetpub\wwwroot\wwwroot\css\site.css" />
+        </environment>
+        <environment exclude="Development">
+            <link rel="stylesheet" href="https://ajax.aspnetcdn.com/ajax/bootstrap/3.3.7/css/bootstrap.min.css"
+                  asp-fallback-href="file:\\\C:\inetpub\wwwroot\wwwroot\lib\bootstrap\dist\css\bootstrap.min.css"
+                  asp-fallback-test-class="sr-only" asp-fallback-test-property="position" asp-fallback-test-value="absolute" />
+            <link rel="stylesheet" href="file:\\\C:\inetpub\wwwroot\wwwroot\css\site.min.css" asp-append-version="true" />
+        </environment>
+    @*<environment include="Development">
+        <link rel="stylesheet" href="file:\\\D:\PRATIK_SHAH_BKP\AccuApp\wwwroot\lib/bootstrap/dist/css/bootstrap.css" />
+        <link rel="stylesheet" href="file:\\\D:\PRATIK_SHAH_BKP\AccuApp\wwwroot\css\site.css" />
+    </environment>*@
+</head>
+<body>
+    <div class="form-group">
+        <table class="table table-bordered table-hover table-striped table-sm">
+            <tr>
+                <td align="center">
+                    <img src="file:\\\C:\inetpub\wwwroot\wwwroot\images\header.png" style="display: inline-block" width=700 height=138 />
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    &nbsp;
+                </td>
+            </tr>
+            <tr>
+                <td align="center">
+                    <span style="font-size:20px;font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif">AccountRequest- AccuApp</span>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    Status: @Model.RequestStatus
+                </td>
+            </tr>
+            <tr>
+                <td> Group Name : @Model.GroupName </td>
+            </tr>
+            <tr>
+                <td> ClientIDs : @(string.IsNullOrEmpty(Model.accountRequest.ClientIDS) ? "" : Model.accountRequest.ClientIDS)  </td>
+            </tr>
+            <tr>
+                <td> RequestType : @Model.ReqType </td>
+            </tr>
+            @if (Model.ReqType == "Add Physician to Existing Account")
+            {
+                <tr>
+                    <td> Existing AccountID : @Model.accountRequest.ExistingAccountID</td>
+                </tr>
+            }
+            <tr>
+                <td> PracticeName : @Model.accountRequest.PracticeName</td>
+            </tr>
+            <tr>
+                <td> PracticeNPI : @Model.accountRequest.PracticeNPI</td>
+            </tr>
+            @if (Model.accountRequest.PhysicianRequests.Count > 0)
+            {
+                @foreach (var item in Model.accountRequest.PhysicianRequests)
+                {
+                    <tr>
+                        <td> PhysicianName : @item.PhysicianName</td>
+                    </tr>
+                    <tr>
+                        <td> PhysicianNPI : @item.PhysicianNPI</td>
+                    </tr>
+                }
+            }
+            <tr>
+                <td> Delivery Option : @Model.DeliveryMethod </td>
+            </tr>
+            @if (Model.DeliveryMethod.Contains("EMR"))
+            {
+                <tr>
+                    <td> EMRVendor : @Model.accountRequest.EMRVendor </td>
+                </tr>
+            }
+            @if (Model.DeliveryMethod.Contains("Fax"))
+            {
+                <tr>
+                    <td> Auto :  @(Model.accountRequest.Auto == true ? "Automatic" : "Manual")</td>
+                </tr>
+            }
+            <tr>
+                <td> Address : @Model.accountRequest.Address </td>
+            </tr>
+            <tr>
+                <td> Suite : @Model.accountRequest.Suite </td>
+            </tr>
+            <tr>
+                <td> City : @Model.accountRequest.City </td>
+            </tr>
+            <tr>
+                <td> State : @Model.accountRequest.State </td>
+            </tr>
+            <tr>
+                <td> Zip : @Model.accountRequest.Zip </td>
+            </tr>
+            <tr>
+                <td> Phone : @Model.accountRequest.Phone </td>
+            </tr>
+            <tr>
+                <td> Fax : @Model.accountRequest.Fax </td>
+            </tr>
+            <tr>
+                <td> Office ContactName : @Model.accountRequest.OfficeContactName </td>
+            </tr>
+            <tr>
+                <td> Contact Email : @Model.accountRequest.ContactEmail </td>
+            </tr>
+            <tr>
+                <td> SuppliesNeeded : @Model.accountRequest.SuppliesNeeded </td>
+            </tr>
+
+            <tr>
+                <td> NeedPgxPortal : @(Model.accountRequest.NeedPgxPortal == true ? "Yes" : "No") </td>
+            </tr>
+            @if (Model.accountRequest.NeedPgxPortal == true)
+            {
+                <tr>
+                    <td> Physician Email : @Model.accountRequest.PhysicianEmail </td>
+                </tr>
+            }
+            @if (!string.IsNullOrEmpty(Model.accountRequest.WebUserName))
+            {
+                <tr>
+                    <td> WebUserName : @Model.accountRequest.WebUserName </td>
+                </tr>
+            }
+            @if (!string.IsNullOrEmpty(Model.accountRequest.WebUserPassword))
+            {
+                <tr>
+                    <td> WebUser Password : @Model.accountRequest.WebUserPassword </td>
+                </tr>
+            }
+            <tr>
+                <td> RequestedBy : @Model.accountRequest.RequestedBy </td>
+            </tr>
+            <tr>
+                <td> Request Date : @Model.accountRequest.RequestDate </td>
+            </tr>
+        </table>
+
+    </div>
+</body>
+</html>

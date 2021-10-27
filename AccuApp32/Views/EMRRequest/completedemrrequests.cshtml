@@ -1,0 +1,321 @@
+﻿
+@{
+    Layout = "~/Views/Shared/_LayoutAdminLte.cshtml";
+
+    var Accounts = (Dictionary<int, string>)ViewBag.AccountList;
+    var Vendors = (Dictionary<int, string>)ViewBag.VendorList;
+}
+<style>
+    #tblEMRRequests th {
+        vertical-align:top;
+        font-size:smaller;
+        text-align:center;
+        background-color:blue;
+        color:white;
+    }
+
+    #tblEMRRequests td {
+        vertical-align:top;
+        font-size:smaller;
+    }
+</style>
+<!--Details-->
+<div class="modal fade" id="frmEMRRequestDetails" tabindex="-1" role="dialog" aria-labelledby="frmEMRRequestDetailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="frmEMRRequestDetailsModalLabel">Details</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <table class="table">
+                    <tr>
+                        <td>
+                            OfficeManagerName
+                        </td>
+                        <td>
+                            <label id="lblOfficeManagerName"></label> 
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            OfficeManagerEmail
+                        </td>
+                        <td>
+                            <label id="lblOfficeManagerEmail"></label> 
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            OfficeManagerPhone
+                        </td>
+                        <td>
+                            <label id="lblOfficeManagerPhone"></label> 
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            PhysicianName
+                        </td>
+                        <td>
+                            <label id="lblPhysicianName"></label> 
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            PhysicianSpecialty
+                        </td>
+                        <td>
+                            <label id="lblPhysicianSpecialty"></label> 
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            ExpectedSpecimenCount
+                        </td>
+                        <td>
+                            <label id="lblExpectedSpecimenCount"></label> 
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            CustomPanels
+                        </td>
+                        <td>
+                            <label id="lblCustomPanels"></label> 
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            Vendor
+                        </td>
+                        <td>
+                            <label id="lblVendor"></label> 
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            VendorContact
+                        </td>
+                        <td>
+                            <label id="lblVendorContact"></label> 
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            VendorPhone
+                        </td>
+                        <td>
+                            <label id="lblVendorPhone"></label> 
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            VendorFax
+                        </td>
+                        <td>
+                            <label id="lblVendorFax"></label> 
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            VendorEmail
+                        </td>
+                        <td>
+                            <label id="lblVendorEmail"></label> 
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            ConnectionType
+                        </td>
+                        <td>
+                            <label id="lblConnectionType"></label> 
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            RequestedBy
+                        </td>
+                        <td>
+                            <label id="lblRequestedBy"></label> 
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            RequestedDate
+                        </td>
+                        <td>
+                            <label id="lblRequestedDate"></label> 
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            VendorInstallationCost
+                        </td>
+                        <td>
+                            <label id="lblVendorInstallationCost"></label> 
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            VendorMaintenanceCost
+                        </td>
+                        <td>
+                            <label id="lblVendorMaintenanceCost"></label> 
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            VendorAnnualCost
+                        </td>
+                        <td>
+                            <label id="lblVendorAnnualCost"></label> 
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            ComtronInstallationCost
+                        </td>
+                        <td>
+                            <label id="lblComtronInstallationCost"></label> 
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            RequestStatus
+                        </td>
+                        <td>
+                            <label id="lblRequestStatus"></label> 
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            DenialReason
+                        </td>
+                        <td>
+                            <label id="lblDenialReason"></label> 
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            POSent
+                        </td>
+                        <td>
+                            <input id="chkPOSent" type="checkbox" class="disabled" disabled />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            LISRequestSent
+                        </td>
+                        <td>
+                            <input id="chkLISRequestSent" type="checkbox" class="disabled" disabled />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            ProjectedLiveDate
+                        </td>
+                        <td>
+                            <label id="lblProjectedLiveDate"></label> 
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            ActualLiveDate
+                        </td>
+                        <td>
+                            <label id="lblActualLiveDate"></label> 
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            ComtronTerminationDate
+                        </td>
+                        <td>
+                            <label id="lblComtronTerminationDate"></label> 
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            VendorTerminationDate
+                        </td>
+                        <td>
+                            <label id="lblVendorTerminationDate"></label> 
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            Account
+                        </td>
+                        <td>
+                            <label id="lblAccountID"></label> 
+                        </td>
+                    </tr>
+                </table>
+                <table class="table">
+                    <tr>
+                        <th>
+                            Action Taken
+                        </th>
+                        <th>
+                            Action By
+                        </th>
+                        <th>
+                            Action Date
+                        </th>
+                    </tr>
+                </table>      
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" id="btnSave" class="btn btn-primary">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!--end details-->
+Request status:
+<select id="lstRequestStatus" class="form-control col-sm-2 select-chosen" multiple>
+    <option value=2>Denied</option>
+    <option value=3>Canceled</option>
+    <option value=4>Live</option>
+    <option value=5>Disconnected</option>
+</select>
+<br />
+<br />
+<button type="button" class="btn btn-secondary" id="btnCreateNew">Create New</button>
+<br />
+<br />
+<table id="tblEMRRequests" class="table table-striped table-bordered dataTable">
+    <thead>
+        <tr>
+            <th>Requested Date</th>
+            <th>Status</th>
+            <th>Account ID</th>
+            <th>Account Name</th>
+            <th>Vendor</th>
+            <th>Connection Type</th>
+            <th>Requested By</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tfoot>
+        <tr>
+            <th>Requested Date</th>
+            <th>Status</th>
+            <th>Account ID</th>
+            <th>Account Name</th>
+            <th>Vendor</th>
+            <th>Connection Type</th>
+            <th>Requested By</th>
+            <th></th>
+        </tr>
+    </tfoot>
+</table>
+<!--end dispatch tasks-->
+<script src="~/EMRRequest/CompletedEMRRequest.js">
+</script>

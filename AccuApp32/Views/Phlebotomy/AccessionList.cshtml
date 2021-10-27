@@ -1,0 +1,146 @@
+﻿@{
+    Layout = "~/Views/Shared/_LayoutAdminLte.cshtml";
+}
+<style>
+    #tblAccessions th {
+        vertical-align:top;
+        text-align:center;
+        background-color:blue;
+        color:white;
+    }
+</style>
+<!--Create form-->
+<div class="modal fade" id="frmAccession" tabindex="-1" role="dialog" aria-labelledby="frmAccessionModalLabel" aria-hidden="true">
+    <div class="modal-dialog " role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="frmAccessionModalLabel">Create</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="form-group row">
+                        <div class="col-sm-6">
+                            <label for="txtAccountId" class="col-form-label">AccountID:</label>
+                            <input type="hidden" class="form-control" id="txtAccessionId" />
+                            <input type="text" class="form-control" id="txtAccountId" />
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-sm-6">
+                            <label for="txtPatientName" class="col-form-label">Patient Name:</label>
+                            <input type="text" class="form-control" id="txtPatientName" />
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-sm-6">
+                            <label for="txtPatientDOB" class="col-form-label">Patient DOB:</label>
+                            <input type="date" class="form-control" id="txtPatientDOB" />
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-sm-8">
+                            <label for="txtInsuranceName" class="col-form-label">Insurance Name:</label>
+                            <input type="text" class="form-control" id="txtInsuranceName" />
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-sm-6">
+                            <label for="txtInsuranceId" class="col-form-label">InsuranceId:</label>
+                            <input  type="text" class="form-control" id="txtInsuranceId"  />
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-sm-6">
+                            <label for="txtNote" class="col-form-label">Note:</label>
+                            <textarea rows="3" class="form-control" id="txtNote" ></textarea>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-sm-10">
+                            <label for="chkStat1" class="col-form-label">Specimen Was Sent To Other Lab</label>
+                            <input type="checkbox" id="chkStat1" />
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-sm-10">
+                            <label for="chkStat2" class="col-form-label">Specimen Was Not Sent To Other Lab</label>
+                            <input type="checkbox" id="chkStat2" />
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-sm-10">
+                            <label for="chkStat3" class="col-form-label">Specimen Can Be Sent To Accu</label>
+                            <input type="checkbox" id="chkStat3" />
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-sm-10">
+                            <label for="chkStat4" class="col-form-label">Specimen Cannot Be Sent To Accu</label>
+                            <input type="checkbox" id="chkStat4" />
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" id="btnSave" class="btn btn-primary">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!--End create form-->
+<br />
+<button type="button" class="btn btn-secondary" id="btnCreateNew">Create New</button>
+<br />
+<br />
+Filter:&nbsp;<input  type="date" id="fromDate" />&nbsp;-&nbsp;<input  type="date" id="toDate" />
+<br />
+<br />
+<table id="tblAccessions" class="table table-striped table-bordered dataTable compact">
+    <thead>
+        <tr>
+            <th>Status</th>
+            <th>AccountID</th>
+            <th>PatientName</th>
+            <th>PatientDOB</th>
+            <th>PatientGender</th>
+            <th>InsuranceName</th>
+            <th>InsuranceID</th>
+            <th>Note</th>
+            <th>Specimen Was Sent To Other Lab</th>
+            <th>Specimen Was Not Sent To Other Lab</th>
+            <th>Specimen Can Be Sent To Accu</th>
+            <th>Specimen Cannot Be Sent To Accu</th>
+            <th>Last Modified By</th>
+            <th>Created By</th>
+            <th></th>
+            <th></th>
+        </tr>
+    </thead>
+    <tfoot>
+        <tr>
+            <th>Status</th>
+            <th>AccountID</th>
+            <th>PatientName</th>
+            <th>PatientDOB</th>
+            <th>PatientGender</th>
+            <th>InsuranceName</th>
+            <th>InsuranceID</th>
+            <th>Note</th>
+            <th>Specimen Was Sent To Other Lab</th>
+            <th>Specimen Was Not Sent To Other Lab</th>
+            <th>Specimen Can Be Sent To Accu</th>
+            <th>Specimen Cannot Be Sent To Accu</th>
+            <th>Last Modified By</th>
+            <th>Created By</th>
+            <th></th>
+            <th></th>
+        </tr>
+    </tfoot>
+</table>
+<!--end dispatch tasks-->
+<script src="~/Phlebotomy/accession.js">
+</script>

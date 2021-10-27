@@ -1,0 +1,979 @@
+﻿@{ 
+    Layout = "~/Views/Shared/_LayoutAdminLte.cshtml";
+}
+<style>
+
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        top: 0;
+        left: 0;
+        height: 100%;
+        width: 100%;
+        background: rgba( 255, 255, 255, .8 ) url('http://i.stack.imgur.com/FhHRx.gif') 50% 50% no-repeat;
+    }
+
+    /* When the body has the loading class, we turn
+    the scrollbar off with overflow:hidden */
+    body.loading .modal {
+        overflow: hidden;
+    }
+
+    /* Anytime the body has the loading class, our
+    modal element will be visible */
+    body.loading .modal {
+        display: block;
+    }
+
+    ul.field_select {
+        list-style-type: none;
+        margin: 0px;
+        padding: 0px;
+    }
+
+    tr.field_row td {
+        vertical-align: top;
+        border-width: 1px;
+        border-style: solid;
+    }
+
+    tr.field_row th {
+        text-align: center;
+        border-width: 1px;
+        border-style: solid;
+        background-color: lightgray
+    }
+
+    button.field_remove {
+        width: 5px;
+        height: 5px;
+    }
+
+    li {
+        cursor: pointer;
+        display: inline;
+    }
+
+        li.field {
+            font-size: 0.75rem;
+            border: 1px solid black;
+            font-size: 12px;
+            width: 20px;
+            margin: 3px;
+            border-radius: 2px;
+        }
+
+    table.field {
+        font-size: 0.7rem
+    }
+
+    div.table_fields {
+        display: inline;
+        float: left;
+        clear: left;
+    }
+
+    #tbTableData td {
+        font-size: 0.75rem;
+    }
+
+    div.order-asc {
+        display: none;
+    }
+
+    div.order-desc {
+        display: none;
+    }
+
+    div.filter-val1 {
+        display: none;
+    }
+
+    div.filter-val2 {
+        display: none;
+    }
+
+    #pgPagerHeader li {
+        display: inline;
+    }
+
+    #pgPagerFooter li {
+        display: inline;
+    }
+
+    li.pg-number {
+        margin-left: 2px;
+        margin-right: 2px;
+        border: 1px solid black;
+        background-color: white;
+        color:blue;
+        font-size: 12px;
+        width: 20px;
+    }
+
+    li.btn-secondary {
+        font-size:16px;
+    }
+
+</style>
+
+<div style="display:none" id="tdTemplate">
+    <table class="field btn btn-primary" style="border:solid 1px black;width:100%;">
+        <tr>
+            <td>
+                <div class="field_select" style="font-size:0.75rem;float:left"></div>
+                <div style="float:right;font-size:12px;">
+                    <i class="far fa-times-circle"></i>
+                </div>
+            </td>
+        </tr>
+        <tr>
+            <td class="filter">
+                <div class="filter-val1">
+                    <input class="row-filter-val1" type="text" value="" style="width:100%" />
+                </div>
+                <div class="select-element">
+                    <input type="hidden" class="selected-value" />
+                    <input type="hidden" class="selected-value-type" />
+                    <select class="field-where">
+                    </select>
+                </div>
+                <div class="filter-val2">
+                    <input class="row-filter-val2" type="text" value="" style="width:100%" />
+                </div>
+            </td>
+        </tr>
+        <tr>
+            <td class="group">
+                <div class="group-element" style="float:left">
+                    <input type="hidden" class="group-selected-value" />
+                    <input type="hidden" class="group-selected-value-type" />
+                    <select class="group-select">
+                    </select>
+                </div>
+                <div class="order-settings" style="float:right;font-size:12px;color:blue">
+                    <input type="hidden" class="order-direction" value="" />
+                    <div class="order-number" style="float:left"></div>
+                    <div class="order-asc" style="float:left"><i class="fas fa-long-arrow-alt-up"></i></div>
+                    <div class="order-desc" style="float:left"><i class="fas fa-long-arrow-alt-down"></i></div>
+                </div>
+            </td>
+        </tr>
+    </table>
+</div>
+<br />
+<ul class="nav nav-tabs " id="tabFields" role="tablist">
+    <li class="nav-item ">
+        <a class="nav-link active" id="tabBillData" data-toggle="tab" href="#tBillData" role="tab" aria-controls="tBillData" aria-selected="true">Bill Data</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" id="tabBillType" data-toggle="tab" href="#tBillType" role="tab" aria-controls="tBillType" aria-selected="false">Bill Type</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" id="tabPLAccount" data-toggle="tab" href="#tPLAccount" role="tab" aria-controls="tPLAccount" aria-selected="false">PL Account</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" id="tabPLGroup" data-toggle="tab" href="#tPLGroup" role="tab" aria-controls="tPLGroup" aria-selected="false">PL Group</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" id="tabMarkedBill" data-toggle="tab" href="#tMarkedBill" role="tab" aria-controls="tMarkedBill" aria-selected="false">Marked Bill</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" id="tabBillMedical" data-toggle="tab" href="#tBillMedical" role="tab" aria-controls="tBillMedical" aria-selected="false">Bill Medical</a>
+    </li>
+</ul>
+<div class="field_row tab-content border" >
+    <div class="table_fields tab-pane fade show active" id="tBillData" role="tabpanel" aria-labelledby="tabBillData">
+        <ul class="field_select" id="BillDataFields"></ul>
+    </div>
+    <div class="table_fields tab-pane fade" id="tBillType" role="tabpanel" aria-labelledby="tabBillType">
+        <ul class="field_select" id="BillTypeFields"></ul>
+    </div>
+    <div class="table_fields tab-pane fade" id="tPLAccount" role="tabpanel" aria-labelledby="tabPLAccount">
+        <ul class="field_select" id="PLAccountFields"></ul>
+    </div>
+    <div class="table_fields tab-pane fade" id="tPLGroup" role="tabpanel" aria-labelledby="tabPLGroup">
+            <ul class="field_select" id="PLGroupFields"></ul>
+    </div>
+    <div class="table_fields tab-pane fade" id="tMarkedBill" role="tabpanel" aria-labelledby="tabMarkedBill">
+            <ul class="field_select" id="MarkedBillFields"></ul>
+    </div>
+    <div class="table_fields tab-pane fade" id="tBillMedical" role="tabpanel" aria-labelledby="tabBillMedicalRecord">
+            <ul class="field_select" id="BillMedicalRecordFields"></ul>
+    </div>
+</div>
+
+<br />
+<br />
+<br />
+<br />
+<div style="float:left;clear:left"><button id="loadData" class="btn btn-primary">Load data</button></div>
+<div style="float:left;margin-left:5px;"><button id="btnClearReport" title="Clear report" class="btn btn-primary"><i class="fas fa-backspace"></i></button></div>
+<div style="float:left;margin-left:5px;"><button id="saveReportDB" title="Save report settings" class="btn btn-primary"><i class="far fa-save"></i></button></div>
+<div style="float:left;margin-left:5px;"><button id="deleteReportDB" title="Delete selected report" class="btn btn-primary"><i class="fas fa-trash-alt"></i></i></button></div>
+<div style="float:left;margin-left:5px;">Select report...</div>
+<div style="float:left;margin-left:5px;"><select id="selectReport" class="btn btn-primary"></select></div>
+<br />
+<br />
+<div style="float:left">
+    <input type="hidden" id="pagenumber" value="1" />
+    <div style="float:left">Page size:</div>
+    <div style="float:left">
+        <select id="pageSize" class="btn btn-primary">
+            <option value="10">10</option>
+            <option value="20" selected>20</option>
+            <option value="30">30</option>
+            <option value="40">40</option>
+        </select>
+    </div>
+    <div id="pagerIndicies" style="float:left;margin:5px;"></div>
+</div>
+<br />
+<br />
+<div style="float:left;clear:left"><ul id="pgPagerHeader"></ul></div>
+<div style="float:left;clear:left">
+    <table id="tbReport">
+        <thead id="tbFields">
+            <tr>
+            </tr>
+        </thead>
+        <tbody id="tbTableData">
+        </tbody>
+    </table>
+</div>
+&nbsp;
+<clear/>
+<br />
+<br />
+<div style="float:left;clear:left"><ul id="pgPagerFooter"></ul></div>
+
+<script>
+    var financeFields = null;
+    var orderExpr = "";
+
+    $body = $("body");
+
+    $(document).on({
+        ajaxStart: function () { $body.addClass("loading"); },
+        ajaxStop: function () { $body.removeClass("loading"); }
+    });
+
+    $(function () {
+        //get reports list
+
+
+
+        function GetReports() {
+            $.get({
+                url: "/reportmanagment",
+                method: "GET",
+                dataType: "JSON",
+                success: function (data) {
+                    let sel = $("#selectReport");
+                    sel.append($("<option/>").val(-1).text(""));
+                    $.each(data, function () {
+                        sel.append($("<option/>").val(this.ReportId).text(this.ReportName));
+                    });
+                }
+            });
+        }
+        //save report settings - click save button
+        $("#saveReportDB").click(function (event) {
+            debugger;
+
+            let ths = $("#tbFields tr:first>th");
+            if (ths.length == 0)
+                return;
+
+            let reportName = $("#selectReport option:selected").text();
+            let reportId = $("#selectReport").val();
+
+            if (reportId == "-1") {
+                reportName = prompt("Enter report name:");
+                if (reportName == null) {
+                    return;
+                } 
+
+            } else {
+                let c = confirm("Rewrite current report settings");
+                if (!c)
+                    return;
+            }
+
+            let bodyReport = $("#tbFields tr").html();
+
+            $.ajax({
+                url: "/reportmanagment/savereport",
+                method: "POST",
+                dataType: "json",
+                data: { reportId: reportId, reportName: reportName, bodyReport: bodyReport }
+            }).done(function (data, textStatus, jqXHR) {
+                if (data.ReportId > 0) {
+                    //adding new option
+                    if (reportId == "-1") {
+                        $("#selectReport").append($("<option/>").val(data.ReportId.toString()).text(data.ReportName));
+                        $("#selectReport").val(data.ReportId.toString());
+                    }
+                    alert("Report saved successfull!");
+                }
+            }).fail(function (jqHhr, textStatus, errorThown) {
+
+            });
+        });
+        //delete report from db
+        $("#deleteReportDB").click(function (event) {
+            let reportId = $("#selectReport").val();
+            if (reportId == "-1")
+                return;
+
+            let opt = $("#selectReport option:selected");
+
+            $.ajax({
+                url: "/reportmanagment/deletereport",
+                method: "POST",
+                dataType: "json",
+                data: { reportId: reportId}
+            }).done(function (data, textStatus, jqXHR) {
+                if (data == "Ok") {
+                    $(opt).remove();
+                    $("#selectReport").val("-1");
+                    alert("Report deleted successfull!");
+                }
+            }).fail(function (jqHhr, textStatus, errorThown) {
+
+            });
+            
+        });
+        //select specific report and load report settings
+        $("#selectReport").change(function (event) {
+
+            ClearReport();
+
+            let reportId = $("#selectReport").val();
+            if (reportId == "-1")
+                return;
+
+            $.get({
+                url: "/reportmanagment/getreport",
+                method: "GET",
+                dataType: "json",
+                data: {reportId:reportId},
+                success: function (data) {
+                    $("#tbFields tr:first").html(data.Content);
+
+                    $.each($("#tbFields tr:first>th"), function (index, item) {
+                        let tableField = $(item).find("table.field");
+                        let dataType = $(tableField).attr("dataType");
+                        BindReportHeaderFieldEvent(dataType, item);
+                    });
+
+                }
+            });
+
+        });
+
+        //fill reports select
+        GetReports();
+        //get settings current report
+        GetReportSetting();
+        //set initial pagenumber
+        $("#pageSize").change(function (event) {
+            $("#pagenumber").val(1);
+        });
+
+        function ClearReport() {
+            $("#pagenumber").val(1);
+            $("#pgPagerHeader").html("");
+            $("#pgPagerFooter").html("");
+            $("#tbTableData").html("");
+            $("#tbFields tr:first").html("");
+        }
+        //clear currentreport
+        $("#btnClearReport").click(function (event) {
+            ClearReport();
+        });
+        //fill data fields lists
+        $.get({
+            url: "/Dictionary/financefields",
+            method: "GET",
+            dataType: "JSON",
+            success: function (data) {
+                financeFields = data;
+                let sel = $("#BillDataFields");
+                $.each(data.BillDataFields, function () {
+                    sel.append($("<li/>").attr("fieldName", "[" + this.TableName + "].[" + this.ColumnName + "]").text("[" + this.ColumnName + "]").attr("tableName", this.TableName).attr("columnName", this.ColumnName).attr("dataType", this.ColumnType).addClass("field btn-secondary"));
+                });
+                sel = $("#BillTypeFields");
+                $.each(data.BillTypeFields, function () {
+                    sel.append($("<li/>").attr("fieldName", "[" + this.TableName + "].[" + this.ColumnName + "]").text("[" + this.ColumnName + "]").attr("tableName", this.TableName).attr("columnName", this.ColumnName).attr("dataType", this.ColumnType).addClass("field btn-secondary"));
+                });
+                sel = $("#PLAccountFields");
+                $.each(data.PLAccountFields, function () {
+                    sel.append($("<li/>").attr("fieldName", "[" + this.TableName + "].[" + this.ColumnName + "]").text("[" + this.ColumnName + "]").attr("tableName", this.TableName).attr("columnName", this.ColumnName).attr("dataType", this.ColumnType).addClass("field btn-secondary"));
+                });
+                sel = $("#PLGroupFields");
+                $.each(data.PLGroupFields, function () {
+                    sel.append($("<li/>").attr("fieldName", "[" + this.TableName + "].[" + this.ColumnName + "]").text("[" + this.ColumnName + "]").attr("tableName", this.TableName).attr("columnName", this.ColumnName).attr("dataType", this.ColumnType).addClass("field btn-secondary"));
+                });
+                sel = $("#MarkedBillFields");
+                $.each(data.MarkedBillFields, function () {
+                    sel.append($("<li/>").attr("fieldName", "[" + this.TableName + "].[" + this.ColumnName + "]").text("[" + this.ColumnName + "]").attr("tableName", this.TableName).attr("columnName", this.ColumnName).attr("dataType", this.ColumnType).addClass("field btn-secondary"));
+                });
+                sel = $("#BillMedicalRecordFields");
+                $.each(data.BillMedicalRecordFields, function () {
+                    sel.append($("<li/>").attr("fieldName", "[" + this.TableName + "].[" + this.ColumnName + "]").text("[" + this.ColumnName + "]").attr("tableName", this.TableName).attr("columnName", this.ColumnName).attr("dataType", this.ColumnType).addClass("field btn-secondary"));
+                });
+                $("li.field").click(function (event) {
+                    //add new field
+                    $("#tbFields>tr:first").append("<th class='th-field'>" + $("#tdTemplate").html() + "</th>");
+                    //get reference on new field
+                    let tableField = $("#tbFields>tr:first>th:last");
+                    //prepare field, fill property
+                    let dataType = $(this).attr("dataType");
+                    let tableName=$(this).attr("tableName");
+                    let columnName = $(this).attr("columnName");
+                    let fieldName = $(this).attr("fieldName");
+                    PrepareField(tableField, fieldName, dataType, tableName, columnName);
+                    //binding events for new field 
+                    BindReportHeaderFieldEvent(dataType, tableField);
+                    //end prepare field
+                    $("#tbReport").sorttable({}).disableSelection();
+                });
+            }
+        });
+
+
+        //button load data click event
+        $("#loadData").click(function () {
+
+            let ths = $("#tbFields tr:first>th");
+            if (ths.length == 0)
+                return;
+
+            let query = createSqlComponent();
+            if (query == null)
+                return;
+
+            query.pageSize = $("#pageSize").val();
+            query.pagenumber = $("#pagenumber").val();
+
+            LoadData(query);
+        });
+        //reset order number
+        function resetOrder() {
+            $("#tbFields input.order-direction").val("");
+            $("#tbFields div.order-number").text("");
+            $("#tbFields div.order-asc").hide();
+            $("#tbFields div.order-desc").hide();
+        }
+        //save report settings
+        function ReportSettingSave() {
+            debugger;
+
+            $.each($("#tbFields tr:first input"), function (index,item) {
+                $(item).attr("value", $(item).val());
+            });
+
+            $.each($("#tbFields option[selected]"), function (index, item) {
+                var s1 = $(item).val();
+                var s2 = $(item).parent().val();
+                if (s1!= s2) {
+                    $(item).attr("selected", false);
+                }
+            });
+            $.each($("#tbFields tr:first select"), function (index, item) {
+                var selOption = $(item).find("option:selected");
+                $(selOption).attr("selected", true);
+            });
+
+            $.ajax({
+                url: "/reportmanagment/savesettings",
+                method: "POST",
+                dataType: "html",
+                data: { body: $("#tbFields tr").html()}
+            }).done(function (data, textStatus, jqXHR) {
+            }).fail(function (jqHhr, textStatus, errorThown) {
+            });
+        }
+        //prepare field, filling field property
+        function PrepareField(item,fieldName,dataType,tableName,columnName) {
+            //set field settings
+            let tableField = $(item).find("table.field");
+            $(tableField).attr("dataType", dataType);
+            //tablename,columanName
+            $(tableField).attr("tableName", tableName);
+            $(tableField).attr("columnName", columnName);
+            //field alias
+            let fieldAlias = "[" + $(tableField).attr("tableName") + $(tableField).attr("columnName") + RandomInt(10000) + "]";
+            $(tableField).attr("fieldAlias", fieldAlias);
+            //field label
+            let lbl = $(item).find("div.field_select");
+            //add to label field name,alias
+            $(lbl).text(fieldName);
+            $(lbl).attr("fieldalias", fieldAlias);
+            //add where select operand option
+            let select = $(item).find("select.field-where");
+
+            if (dataType == "date") {
+                $(select).closest("td.filter").find("input.row-filter-val1").datepicker();
+                $(select).closest("td.filter").find("input.row-filter-val2").datepicker();
+            }
+            $(select).siblings("input.selected-value-type").val(dataType);
+            //append options to select
+            if (dataType == "text" || dataType == "numeric") {
+                select.append($("<option/>").val("").text(""));
+                if (dataType == "text")
+                    select.append($("<option/>").val("like").text("like"));
+                select.append($("<option/>").val("=").text("="));
+                select.append($("<option/>").val("between").text("between"));
+                select.append($("<option/>").val("in").text("in"));
+                select.append($("<option/>").val(">").text(">"));
+                select.append($("<option/>").val(">=").text(">="));
+                select.append($("<option/>").val("<").text("<"));
+                select.append($("<option/>").val("<=").text("<="));
+            }
+            if (dataType == "date") {
+                select.append($("<option/>").val("").text(""));
+                select.append($("<option/>").val("=").text("="));
+                select.append($("<option/>").val("between").text("between"));
+                select.append($("<option/>").val("in").text("in"));
+                select.append($("<option/>").val(">").text(">"));
+                select.append($("<option/>").val(">=").text(">="));
+                select.append($("<option/>").val("<").text("<"));
+                select.append($("<option/>").val("<=").text("<="));
+            }
+            //set default option
+            if (dataType == "text") {
+                $(select).val("like");
+                $(select).closest("td.filter").find("input.selected-value").val("like");
+                $(select).closest("td.filter").find("div.filter-val1").hide();
+                $(select).closest("td.filter").find("div.filter-val2").show();
+            }
+            if (dataType == "numeric" || dataType == "date") {
+                $(select).val("=");
+                $(select).closest("td.filter").find("input.selected-value").val("=");
+                $(select).closest("td.filter").find("div.filter-val1").hide();
+                $(select).closest("td.filter").find("div.filter-val2").show();
+            }
+            //group dropdown create
+            select = $(item).find("select.group-select");
+            if (dataType == "date" || dataType == "text" || dataType == "numeric") {
+                select.append($("<option/>").val("").text(""));
+                if (dataType == "numeric")
+                    select.append($("<option/>").val("sum").text("sum"));
+                select.append($("<option/>").val("max").text("max"));
+                select.append($("<option/>").val("min").text("min"));
+                select.append($("<option/>").val("count").text("count"));
+                select.append($("<option/>").val("count distinct").text("count distinct"));
+                if (dataType == "numeric")
+                    select.append($("<option/>").val("avg").text("avg"));
+            }
+        }
+        //bind event to field controls
+        function BindReportHeaderFieldEvent(dataType, item) {
+            //select change event
+            let select = $(item).find("select.field-where");
+            $(select).change(function (event) {
+                $(this).closest("td.filter").find("div.filter-val1").hide();
+                $(this).closest("td.filter").find("div.filter-val2").hide();
+                let v = $(event.target).val();
+                $(this).closest("td.filter").find("input.selected-value").val(v);
+                if (v == "between") {
+                    $(this).closest("td.filter").find("div.filter-val1").show();
+                    $(this).closest("td.filter").find("div.filter-val2").show();
+                } else {
+                    $(this).closest("td.filter").find("div.filter-val2").show();
+                }
+            });
+            //group select change event
+            select = $(item).find("select.group-select");
+            $(select).change(function (event) {
+                let v = $(event.target).val();
+                $(this).closest("td.group").find("input.group-selected-value").val(v);
+            });
+            //set group default value
+            let lbl = $(item).find("div.field_select");
+            //event click header field name
+            $(lbl).click(function () {
+
+                let tableField = $(this).closest("table.field");
+
+                if (window.event.ctrlKey)
+                    toggleSort(tableField, false);
+                else
+                    toggleSort(tableField, true);
+
+
+                let query = createSqlComponent();
+                if (query == null)
+                    return;
+
+                query.pageSize = $("#pageSize").val();
+                query.pagenumber = $("#pagenumber").val();
+                LoadData(query);
+            });
+            //button remove
+            let btn = $(item).find("i.fa-times-circle");
+            $(btn).click(function () {
+                //remove th
+                let table = $(this).closest("th.th-field");
+                let colNumber = table.index();
+                table.remove();
+                //remove all td from tbody for this column
+                let removeTd = "td:eq(" + colNumber + ")";
+                $("#tbTableData tr").each(function () {
+                    $(this).find(removeTd).remove();
+                });
+            });
+        }
+        //get report settings
+        function GetReportSetting() {
+            $.ajax({
+                url: "/reportmanagment/getreportsettings",
+                method: "GET",
+                dataType: "html",
+            }).done(function (data, textStatus, jqXHR) {
+                $("#tbFields tr").html(data);
+                $.each($("#tbFields tr select"), function (index,item) {
+                    var v1 = $(item).find("option[selected]").val();
+                    $(item).val(v1);
+                });
+                $.each($("#tbFields tr:first>th"), function (index, item) {
+                    let tableField = $(item).find("table.field");
+                    let dataType = $(tableField).attr("dataType");
+                    BindReportHeaderFieldEvent(dataType,item);
+                });
+            }).fail(function (jqHhr, textStatus, errorThown) {
+            });
+        }
+        //load data
+        function LoadData(query) {
+
+            ReportSettingSave();
+
+            $.ajax({
+                url: "/billingtools/loaddata",
+                method: "POST",
+                dataType: "html",
+                data: query
+            }).done(function (data, textStatus, jqXHR) {
+                $("#tbTableData").html(data);
+                $("#tbTableData tr:odd").css("background-color", "lightgray");
+                let infoPager = "Page:" + $("#pagenumber").val();
+                $("#pagerIndicies").text(infoPager);
+                CreatePager();
+                //bind event
+                $("li.pg-number").click(function () {
+
+                    let pgNumber = $(this).attr("pageNumber");
+                    $("#pagenumber").val(pgNumber);
+                    let infoPager = "Page:" + pgNumber;
+                    $("#pagerIndicies").text(infoPager);
+
+                    let query = createSqlComponent();
+                    if (query == null)
+                        return;
+                    query.pageSize = $("#pageSize").val();
+                    query.pagenumber = $("#pagenumber").val();
+                    LoadData(query);
+                });
+            }).fail(function (jqHhr, textStatus, errorThown) {
+            });
+        }
+        //toogle sort
+        function toggleSort(tableField, resetOrd) {
+            if (tableField != null) {
+
+                let order_direction = tableField.find("input.order-direction");
+                let order_asc = tableField.find("div.order-asc");
+                let order_desc = tableField.find("div.order-desc");
+                let order_number = tableField.find("div.order-number");
+
+                let prev_ord_dir = $(order_direction).val();
+                let prev_ord_num = $(order_number).text();
+
+                if (resetOrd)
+                    resetOrder();
+
+                $(order_number).text(prev_ord_num);
+
+
+                if (prev_ord_dir == "") {
+                    let orn = GetOrderNumber();
+                    $(order_direction).val("asc");
+                    $(order_asc).show();
+                    $(order_desc).hide();
+                    if (resetOrd)
+                        $(order_number).text(orn);
+                    else {
+                        let orn = GetOrderNumber();
+                        $(order_number).text(orn + 1);
+                    }
+
+                } else if (prev_ord_dir == "asc") {
+                    $(order_direction).val("desc");
+                    $(order_asc).hide();
+                    $(order_desc).show();
+                } else if (prev_ord_dir == "desc") {
+                    $(order_direction).val("");
+                    $(order_asc).hide();
+                    $(order_desc).hide();
+                    $(order_number).text("");
+
+                    ReorderSortNumber();
+                }
+            }
+        }
+        //set sort
+        function setSort(tableField, direction, resetOrd) {
+            if (tableField != null) {
+                if (resetOrd)
+                    resetOrder();
+
+                let order_direction = $(tableField).find("input.order-direction");
+                let order_asc = $(tableField).find("div.order-asc");
+                let order_desc = $(tableField).find("div.order-desc");
+                let order_number = $(tableField).find("div.order-number");
+
+                if (direction == "asc") {
+                    let orn = GetOrderNumber();
+                    $(order_direction).val("asc");
+                    $(order_asc).show();
+                    $(order_desc).hide();
+                    $(order_number).text(orn);
+                } else if (direction == "desc") {
+                    $(order_direction).val("desc");
+                    $(order_asc).hide();
+                    $(order_desc).show();
+                } else if (direction == "") {
+                    $(order_direction).val("");
+                    $(order_asc).hide();
+                    $(order_desc).hide();
+                    $(order_number).val("");
+
+                    ReorderSortNumber();
+                }
+            }
+        }
+        //get order number
+        function GetOrderNumber() {
+            let number = 1;
+            let numbers = $("#tbFields div.order-number");
+            numbers.sort(function (a, b) {
+                let aVal = $(a).text();
+                let bVal = $(b).text();
+
+                if (aVal < bVal)
+                    return -1;
+                if (bVal == aVal)
+                    return 0;
+                if (aVal > bVal)
+                    return 1;
+            });
+            if (numbers.length > 0 && $(numbers[numbers.length - 1]).text() != "")
+                number = parseInt($(numbers[numbers.length - 1]).text());
+            return number;
+        }
+        //reorder number sort
+        function ReorderSortNumber() {
+            let numbers = $("#tbFields div.order-number").sort(function (a, b) {
+                let aVal = $(a).text();
+                let bVal = $(b).text();
+
+                if (aVal < bVal)
+                    return -1;
+                if (bVal == aVal)
+                    return 0;
+                if (aVal > bVal)
+                    return 1;
+            });
+            let j = 1;
+            $.each(numbers, function (index, item) {
+                if ($(item).text() != "") {
+                    $(item).text(j);
+                    j++;
+                }
+            });
+        }
+        //create order expression
+        function CreateOrderExpr(typ) {
+            let orderExpr = "";
+            let orderSettings = $("#tbFields div.order-settings").sort(function (a, b) {
+                let aVal = $(a).find("div.order-number").text();
+                let bVal = $(b).find("div.order-number").text();
+
+                if (aVal < bVal)
+                    return -1;
+                if (bVal == aVal)
+                    return 0;
+                if (aVal > bVal)
+                    return 1;
+            });
+            $.each(orderSettings, function (index, item) {
+                if ($(item).find("input.order-direction").val() != "")
+                    if (typ)
+                        orderExpr += $(item).closest("table.field").find("div.field_select").text() + " " + $(item).find("input.order-direction").val() + ",";
+                    else {
+                        //let columnNuber = $(item).closest("table.field").parent().index() + 1;
+                        //orderExpr += columnNuber + " " + $(item).find("input.order-direction").val() + ",";
+                        orderExpr += $(item).closest("table.field").attr("fieldalias") + " " + $(item).find("input.order-direction").val() + ",";
+                    }
+            });
+
+            if (orderExpr != "")
+                orderExpr = orderExpr.substring(0, orderExpr.length - 1);
+            return orderExpr;
+        }
+        //create sql command
+        function createSqlComponent() {
+
+            let select = "";
+            let where = "";
+            let group = "";
+            let having = "";
+            let order = "";
+
+            let fields = $("#tbFields table.field");
+
+            //check is query by aggregate function?
+            let isGroup = $("#tbFields input.group-selected-value").filter(function (index, item) {
+                return $(item).val() != "";
+            }).length > 0;
+
+            for (var i = 0; i < fields.length; i++) {
+
+                let fieldName = $(fields[i]).find("div.field_select").text();
+                let fieldNameAlias = $(fields[i]).attr("fieldAlias");
+                let dataType = $(fields[i]).attr("dataType");
+                let groupVal = $(fields[i]).find("input.group-selected-value").val();
+
+                let field1 = groupVal + (groupVal != "" ? "(" : "") + fieldName + (groupVal != "" ? ")" : "");
+
+                select += field1 + " " + fieldNameAlias + ",";
+                if (isGroup && groupVal == "")
+                    group += fieldName + ",";
+
+
+                let oper = $(fields[i]).find("input.selected-value").val();
+                let val1 = $(fields[i]).find("input.row-filter-val1").val();
+                let val2 = $(fields[i]).find("input.row-filter-val2").val();
+
+                if (groupVal == "") {
+                    if (oper == "between" && val1 != "" && val2 != "") {
+                        if (dataType == "text" || dataType == "date") {
+                            where += "(" + fieldName + " " + oper + " '" + val1 + "' and '" + val2 + "') and ";
+                        }
+                        if (dataType == "numeric") {
+                            where += "(" + fieldName + " " + oper + " " + val1 + " and " + val2 + ") and ";
+                        }
+                    }
+                    if (oper == "like" && val2 != "") {
+                        if (dataType == "text") {
+                            where += "(" + fieldName + " " + oper + " '%" + val2 + "%') and ";
+                        }
+                    }
+                    if ((oper == ">" || oper == ">=" || oper == "<" || oper == "<=" || oper == "=") && val2 != "") {
+                        where += "(" + fieldName + oper + " " + ((dataType == "text" || dataType == "date") ? "'" : "") + val2 + ((dataType == "text" || dataType == "date") ? "'" : "") + ") and ";
+                    }
+                } else {
+                    if (oper == "between" && val1 != "" && val2 != "") {
+                        if (dataType == "text" || dataType == "date") {
+                            having += "(" + field1 + " " + oper + " '" + val1 + "' and '" + val2 + "') and ";
+                        }
+                        if (dataType == "numeric") {
+                            having += "(" + field1 + " " + oper + " " + val1 + " and " + val2 + ") and ";
+                        }
+                    }
+                    if (oper == "like" && val2 != "") {
+                        if (dataType == "text") {
+                            having += "(" + field1 + " " + oper + " '%" + val2 + "%') and ";
+                        }
+                    }
+                    if ((oper == ">" || oper == ">=" || oper == "<" || oper == "<=" || oper == "=") && val2 != "") {
+                        having += "(" + field1 + oper + " " + ((dataType == "text" || dataType == "date") ? "'" : "") + val2 + ((dataType == "text" || dataType == "date") ? "'" : "") + ") and ";
+                    }
+                }
+            }
+
+            order = CreateOrderExpr(!isGroup);
+            if (order == "") {
+                let field = $("#tbFields th.th-field")[0];
+                setSort(field, "asc", true);
+                order = CreateOrderExpr(!isGroup);
+            }
+            debugger;
+            //where = CreateWhereExpr();
+
+            if (select.length > 0 && select[select.length - 1] == ",")
+                select = select.substring(0, select.length - 1)
+            if (order.length > 0 && order[order.length - 1] == ",")
+                order = order.substring(0, order.length - 1)
+            if (group.length > 0 && group[group.length - 1] == ",")
+                group = group.substring(0, group.length - 1)
+
+            if (where.substring(where.length - 4) == "and ")
+                where = where.substring(0, where.length - 4);
+
+            if (having.substring(having.length - 4) == "and ")
+                having = having.substring(0, having.length - 4);
+
+
+            let data = {
+                select: select,
+                order: order,
+                where: where,
+                group: group,
+                having: having,
+                typ: !isGroup
+            };
+            return data;
+        }
+        //random number
+        function RandomInt(max) {
+            return Math.floor(Math.random() * Math.floor(max));
+        }
+        //create pager
+        function CreatePager() {
+            debugger;
+            let totRec = 0;
+            let pageSize = $("#pageSize").val();
+
+            let sel1 = $("#pgPagerHeader").empty();
+            let sel2 = $("#pgPagerFooter").empty();
+
+            let Row = $("#tbTableData tr.data-row:first");
+
+            if (Row.length > 0)
+                totRec = $("#tbTableData tr.data-row:first").attr("totalRows");
+
+            let limit = 10;
+            let totalPagesNumber = Math.floor(totRec / pageSize) + 1;
+            let pages1 = totalPagesNumber >= limit ? limit : totalPagesNumber;
+            let pages2 = totalPagesNumber - limit >= pages1 + 1 ? totalPagesNumber - limit : pages1 + 1;
+
+            for (let j = 1; j <= pages1; j++) {
+                let number = j.toString();
+                sel1.append($("<li/>").attr("pageNumber", number).append("<div/>").addClass("pg-number btn btn-primary").text(number));
+                sel2.append($("<li/>").attr("pageNumber", number).append("<div/>").addClass("pg-number btn btn-primary").text(number));
+            }
+
+            sel1.append($("<li/>").attr("pageNumber", 0).append("<div/>").addClass("pg-number btn btn-primary").text("..."));
+            sel2.append($("<li/>").attr("pageNumber", 0).append("<div/>").addClass("pg-number btn btn-primary").text("..."));
+
+            sel1.append($("<li/>").attr("pageNumber", 0).append("<div/>").addClass("pg-number btn btn-primary").text("..."));
+            sel2.append($("<li/>").attr("pageNumber", 0).append("<div/>").addClass("pg-number btn btn-primary").text("..."));
+
+            sel1.append($("<li/>").attr("pageNumber", 0).append("<div/>").addClass("pg-number btn btn-primary").text("..."));
+            sel2.append($("<li/>").attr("pageNumber", 0).append("<div/>").addClass("pg-number btn btn-primary").text("..."));
+
+
+            if (pages2 > 0)
+                for (let j = pages2; j <= totalPagesNumber; j++) {
+                    let number = j.toString();
+                    sel1.append($("<li/>").attr("pageNumber", number).append("<div/>").addClass("pg-number btn btn-primary").text(number));
+                    sel2.append($("<li/>").attr("pageNumber", number).append("<div/>").addClass("pg-number btn btn-primary").text(number));
+                }
+        }
+    });
+</script>

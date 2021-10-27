@@ -1,0 +1,191 @@
+﻿@model WebDB.EMRRequestViewModel
+
+@{
+
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AccountRequest- AccuApp</title>
+    <style>
+        table {
+            border-collapse: collapse;
+        }
+
+        th {
+            border-left: 1px solid black;
+            padding: 4px
+        }
+
+        td {
+            border-left: 1px solid black;
+            padding: 4px;
+        }
+    </style>
+
+    <environment include="Development">
+        <link rel="stylesheet" href="file:\\\C:\inetpub\wwwroot\wwwroot\lib/bootstrap/dist/css/bootstrap.css" />
+        <link rel="stylesheet" href="file:\\\C:\inetpub\wwwroot\wwwroot\css\site.css" />
+    </environment>
+    <environment exclude="Development">
+        <link rel="stylesheet" href="https://ajax.aspnetcdn.com/ajax/bootstrap/3.3.7/css/bootstrap.min.css"
+              asp-fallback-href="file:\\\C:\inetpub\wwwroot\wwwroot\lib\bootstrap\dist\css\bootstrap.min.css"
+              asp-fallback-test-class="sr-only" asp-fallback-test-property="position" asp-fallback-test-value="absolute" />
+        <link rel="stylesheet" href="file:\\\C:\inetpub\wwwroot\wwwroot\css\site.min.css" asp-append-version="true" />
+    </environment>
+    @*<environment include="Development">
+            <link rel="stylesheet" href="file:\\\D:\PRATIK_SHAH_BKP\AccuApp\wwwroot\lib/bootstrap/dist/css/bootstrap.css" />
+            <link rel="stylesheet" href="file:\\\D:\PRATIK_SHAH_BKP\AccuApp\wwwroot\css\site.css" />
+        </environment>*@
+</head>
+<body>
+    <div class="form-group">
+        <table class="table table-bordered table-hover table-striped table-sm">
+            <tr>
+                <td align="center">
+                    <img src="file:\\\C:\inetpub\wwwroot\wwwroot\images\header.png" style="display: inline-block" width=700 height=138 />
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    &nbsp;
+                </td>
+            </tr>
+            <tr>
+                <td align="center">
+                    <span style="font-size:20px;font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif">Original EMRRequest- AccuApp</span>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    Account: @Model.emrRequest.Account.AccountID
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    Office Manager Name: @Model.emrRequest.OfficeManagerName
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    Office Manager Email: @Model.emrRequest.OfficeManagerEmail
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    Office Phone: @Model.emrRequest.OfficeManagerPhone
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    Physician Name: @Model.emrRequest.PhysicianName
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    Physician Specialty: @Model.emrRequest.PhysicianSpecialty
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    Expected Specimen Count: @Model.emrRequest.ExpectedSpecimenCount
+                </td>
+            </tr>
+            @if (Model.emrRequest.HasCustomPanels)
+            {
+                <tr>
+                    <td>
+                        Custom Panels: @Model.emrRequest.CustomPanels
+                    </td>
+                </tr>
+            }
+            <tr>
+                <td>
+                    Vendor Name: @Model.VendorName
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    Vendor Contact: @Model.emrRequest.VendorContact
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    Vendor Phone: @Model.emrRequest.VendorPhone
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    Vendor Fax: @Model.emrRequest.VendorFax
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    Vendor Email: @Model.emrRequest.VendorEmail
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    ConnectionType: @Model.emrRequest.ConnectionType
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    RequestedBy: @Model.emrRequest.RequestedBy
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    RequestedDate: @Model.emrRequest.RequestedDate
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    &nbsp;
+                    &nbsp;
+                    &nbsp;
+                    &nbsp;
+                    &nbsp;
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    &nbsp;
+                    &nbsp;
+                    &nbsp;
+                    &nbsp;
+                    &nbsp;
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <table class="table table-bordered table-hover table-striped table-sm">
+                        <tr>
+                            <td>Action Taken</td>
+                            <td>Action Taken By</td>
+                            <td>Action Taken Date</td>
+                        </tr>
+                        @foreach (var action in Model.emrRequest.EmrNotes)
+                        {
+                            <tr>
+                                <td width="45%">
+                                    @Html.DisplayFor(model => action.NoteContents)
+                                </td>
+                                <td width="35%">
+                                    @Html.DisplayFor(model => action.PlacedBy)
+                                </td>
+                                <td width="20%">
+                                    @Html.DisplayFor(model => action.DatePlaced)
+                                </td>
+                            </tr>
+                        }
+                    </table>
+                </td>
+            </tr>
+        </table>
+    </div>
+</body>
+</html>

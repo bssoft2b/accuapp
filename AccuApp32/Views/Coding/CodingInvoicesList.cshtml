@@ -1,0 +1,136 @@
+﻿@using WebDB;
+@{
+    Layout = "~/Views/Shared/_LayoutAdminLte.cshtml";
+}
+
+@{
+    var codeList = (List<Coding_Code>)ViewBag.StatusList;
+    var teamList=(List<string>)ViewBag.TeamList;
+}
+
+<style>
+    #tblCodingInvoicesList th {
+        vertical-align:top;
+        text-align:center;
+        background-color:blue;
+        color:white;
+    }
+</style>
+
+<!--edit form-->
+<div class="modal fade" id="editCodingInvoices" tabindex="-1" role="dialog" aria-labelledby="editCodingInvoicesModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editCodingInvoicesModalLabel">Edit</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="frmEditCodingInvoice">
+                    <div class="form-group row">
+                        <div class="col-sm-6">
+                            <input type="hidden" class="form-control" id="txtKey" name="txtKey" readonly>
+                            <label for="txtInvoice" class="col-form-label">Invoice:</label>
+                            <input type="text" class="form-control" id="txtInvoice" required>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-sm-6">
+                            <label for="txtBillType" class="col-form-label">Bill Type:</label>
+                            <input type="text" class="form-control" id="txtBillType" name="txtBillType" required>
+                        </div>
+                        <div class="col-sm-6">
+                            <label for="txtPrevBillType" class="col-form-label">Prev Bill Type:</label>
+                            <input type="text" class="form-control" id="txtPrevBillType" name="txtPrevBillType" >
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-sm-6">
+                            <label for="lstStatus" class="col-form-label">Code:</label>
+                            <select class="form-control chosen-select" id="lstStatus" multiple style="width:100px;" name="lstStatus">
+                                @foreach(var cl in codeList){
+                                    <option value="@cl.Code">@cl.Code</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-sm-12">
+                            <label for="txtNotes" class="col-form-label">Notes:</label>
+                            <textarea class="form-control" id="txtNotes"  name="txtNotes"></textarea>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" id="btnOk" class="btn btn-primary">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!--END edit form-->
+
+<br />
+<button id="btnCreateNew">Create new</button> 
+<br />
+<br />
+<table id="tblCodingInvoicesList" class="table table-striped table-bordered dataTable compact">
+    <thead>
+        <tr>
+            <th></th>
+            <th><input type="search" id="srcInvoice" class="form-control input-sm" placeholder="Invoice number"/></th>
+            <th><input type="search" id="srcPrevBillType" class="form-control input-sm" placeholder="Prev bill type"/></th>
+            <th><input type="search" id="srcBillType" class="form-control input-sm" placeholder="Bill type"/></th>
+            <th>
+                <select type="search" id="srcStatus" class="form-control input-sm" >
+                    <option value="">Select one</option>
+                    @foreach (var c in  codeList)
+                    {
+                        <option value="@c.Code">@c.Code</option>
+                    }
+                </select>
+            </th>
+            <th>
+                <select type="search" id="lstUser" class="form-control input-sm">
+                    <option value="">Select one</option>
+                    @foreach (var t in  teamList)
+                    {
+                        <option value="@t">@t</option>
+                    }
+                </select>
+            </th>
+            <th></th>
+            <th> с <input type="date" id="srcFromDate" class="form-control input-sm"/> по <input type="date" id="srcToDate" class="form-control input-sm"/></th>
+            <th><input type="button" id="btnSearch" value="Search" class="btn btn-secondary"/>&nbsp;<input type="button" id="btnReset" value="Reset" class="btn btn-secondary"/></th>
+        </tr>
+        <tr>
+            <th></th>
+            <th>Invoice #</th>
+            <th>Prev BillType</th>
+            <th>BillType</th>
+            <th>Code</th>
+            <th>User</th>
+            <th>Notes</th>
+            <th>Date</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tfoot>
+        <tr>
+            <th></th>
+            <th>Invoice #</th>
+            <th>Prev BillType</th>
+            <th>BillType</th>
+            <th>Code</th>
+            <th>User</th>
+            <th>Notes</th>
+            <th>Date</th>
+            <th></th>
+        </tr>
+    </tfoot>
+</table>
+<script src="~/Coding/codinginvoices.js">
+</script>

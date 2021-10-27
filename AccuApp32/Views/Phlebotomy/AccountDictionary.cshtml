@@ -1,0 +1,45 @@
+﻿@{
+    Layout = "~/Views/Shared/_LayoutAdminLte.cshtml";
+}
+<style>
+    #tblAccountDictionary th {
+        vertical-align: top;
+        text-align: center;
+        background-color: blue;
+        color: white;
+    }
+</style>
+<br />
+<select id="filter" class="form-control col-sm-2">
+    <option value="">All</option>
+    <option value="true">Active</option>
+    <option value="false">Not Active</option>
+</select>
+<br/>
+<table id="tblAccountDictionary" class="table table-striped table-bordered dataTable compact">
+    <thead>
+        <tr>
+            <th>AccountID</th>
+            <th>Name</th>
+            <th>Telephone</th>
+            <th>Fax</th>
+            <th>Address</th>
+            <th>City</th>
+            <th>State</th>
+        </tr>
+    </thead>
+    <tfoot>
+        <tr>
+            <th>AccountID</th>
+            <th>Name</th>
+            <th>Telephone</th>
+            <th>Fax</th>
+            <th>Address</th>
+            <th>City</th>
+            <th>State</th>
+        </tr>
+    </tfoot>
+</table>
+<!--end dispatch tasks-->
+<script src="~/Phlebotomy/accountdictionary.js">
+</script>

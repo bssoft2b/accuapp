@@ -1,0 +1,43 @@
+﻿@using DataModel.Finance
+@using System.Globalization
+@{
+    Layout = "~/Views/Shared/_LayoutAdminLte.cshtml";
+}
+
+<select id="Users">
+</select>
+<br />
+<button id="btnMarkAsWork">Mark as work</button>
+<br />
+<table id="Alerts" class="table table-striped table-bordered dataTable">
+    <thead>
+        <tr>
+            <th>Mark as Worked</th>
+            <th>Action Taken</th>
+            <th>Date Alert Created</th>
+            <th>Invoice #</th>
+            <th>Insurance Name</th>
+            <th>Old Balance</th>
+            <th>New Balance</th>
+            <th>User</th>
+            <th>Last Notes</th>
+        </tr>
+    </thead>
+    <tbody>
+    </tbody>
+    <tfoot>
+        <tr>
+            <th>Mark as Worked</th>
+            <th>Action Taken</th>
+            <th>Date Alert Created</th>
+            <th>Invoice #</th>
+            <th>Insurance Name</th>
+            <th>Old Balance</th>
+            <th>New Balance</th>
+            <th>User</th>
+            <th>Last Notes</th>
+        </tr>
+    </tfoot>
+</table>
+<script src="~/BillingTools/Alerts.js">
+</script>

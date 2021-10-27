@@ -1,0 +1,220 @@
+﻿@{
+    Layout = "~/Views/Shared/_LayoutAdminLte.cshtml";
+}
+<style>
+    #Phlebotomists th, #PhlebotomistsDetails th {
+        vertical-align: top;
+        text-align: center;
+        background-color: blue;
+        color: white;
+    }
+</style>
+<!--edit form-->
+<div class="modal fade" id="editPhlebotomist" tabindex="-1" role="dialog" aria-labelledby="editPhlebotomistModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editPhlebotomistModalLabel">Edit</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="form-group row">
+                        <div class="col-sm-6">
+                            <label for="txtEmployeeID" class="col-form-label">EmployeeID:</label>
+                            <input type="text" class="form-control" id="txtEmployeeID" readonly>
+                        </div>
+                        <div class="col-sm-6">
+                            <label for="txtFirstName" class="col-form-label">First name:</label>
+                            <input type="text" class="form-control" id="txtFirstName" readonly>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-sm-6">
+                            <label for="txtLastName" class="col-form-label">Last name:</label>
+                            <input type="text" class="form-control" id="txtLastName" readonly>
+                        </div>
+                        <div class="col-sm-6">
+                            <label for="txtAddress1" class="col-form-label">Address1:</label>
+                            <input type="text" class="form-control" id="txtAddress1" required>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-sm-6">
+                            <label for="txtAddress2" class="col-form-label">Address2:</label>
+                            <input type="text" class="form-control" id="txtAddress2">
+                        </div>
+                        <div class="col-sm-6">
+                            <label for="txtCity" class="col-form-label">City:</label>
+                            <input type="text" class="form-control" id="txtCity" required>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-sm-6">
+                            <label for="txtState" class="col-form-label">State:</label>
+                            <input type="text" class="form-control" id="txtState" readonly>
+                        </div>
+
+                        <div class="col-sm-6">
+                            <label for="txtZip" class="col-form-label">ZIP:</label>
+                            <input type="text" class="form-control" id="txtZip" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-sm-6">
+                            <label for="txtTelephone" class="col-form-label">Telephone:</label>
+                            <input type="text" class="form-control" id="txtTelephone" required>
+                        </div>
+                    </div>
+                    <input type="hidden" id="TerminationDate" required>
+                    <div class="form-group row">
+                        <div class="col-sm-6 border">
+                            <label for="lstPhlebotomistsLeads" class="col-form-label">Lead name:</label>
+                            <ul id="lstPhlebotomistsLeads" class="form-control" style="list-style-type: none;height:auto!important;">
+                            </ul>
+                            <button type="button" class="btn btn-secondary" id="btnRemoveLead">- Remove Lead</button>
+                        </div>
+                        <div class="col-sm-6 border">
+                            <label for="lstLeads" class="col-form-label">Leads:</label>
+                            <select id="lstLeads" class="form-control">
+                            </select>
+                            <br />
+                            <button id="btnAddLead" type="button" class="btn btn-secondary">+ Add lead</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" id="btnOk" class="btn btn-primary">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!--END edit form-->
+<!--details form-->
+<div class="modal fade" id="detailsPhlebotomist" tabindex="-1" role="dialog" aria-labelledby="detailsPhlebotomistModalLabel" aria-hidden="true">
+    <div class="modal-dialog  modal-xl" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="detailsPhlebotomistModalLabel">Details</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group row">
+                    <div class="col-sm-3">
+                        <label for="lblEmployeeID" class="col-form-label">EmployeeID:</label>
+                        <label class="form-control" id="lblEmployeeID" />
+                    </div>
+                    <div class="col-sm-3">
+                        <label for="lblFirstName" class="col-form-label">First name:</label>
+                        <label class="form-control" id="lblFirstName" />
+                    </div>
+                    <div class="col-sm-3">
+                        <label for="lblLastName" class="col-form-label">Last name:</label>
+                        <label class="form-control" id="lblLastName" />
+                    </div>
+                    <div class="col-sm-3">
+                        <label for="lblAddress1" class="col-form-label">Address1:</label>
+                        <label class="form-control" id="lblAddress1" />
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-sm-3">
+                        <label for="lblAddress2" class="col-form-label">Address2:</label>
+                        <label class="form-control" id="lblAddress2" />
+                    </div>
+                    <div class="col-sm-3">
+                        <label for="lblCity" class="col-form-label">City:</label>
+                        <label class="form-control" id="lblCity" />
+                    </div>
+                    <div class="col-sm-3">
+                        <label for="lblState" class="col-form-label">State:</label>
+                        <label class="form-control" id="lblState" />
+                    </div>
+
+                    <div class="col-sm-3">
+                        <label for="lblZip" class="col-form-label">ZIP:</label>
+                        <label class="form-control" id="lblZip" />
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-sm-3">
+                        <label for="lblTelephone" class="col-form-label">Telephone:</label>
+                        <label class="form-control" id="lblTelephone" />
+                    </div>
+                    <div class="col-sm-3">
+                        <label for="lblTerminationDate" class="col-form-label">Termination Date:</label>
+                        <label class="form-control" id="lblTerminationDate" />
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-sm-12">
+                        <table id="PhlebotomistsDetails" class="table table-striped table-bordered dataTable">
+                            <thead>
+                                <tr>
+                                    <th>AccountID</th>
+                                    <th>GroupID</th>
+                                    <th>PhlebotomistAssignmentID</th>
+                                    <th>PhlebotomistAssignmentLineID</th>
+                                    <th>Percentage</th>
+                                </tr>
+                            </thead>
+                            <tbody >
+                                
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <th>AccountID</th>
+                                    <th>GroupID</th>
+                                    <th>PhlebotomistAssignmentID</th>
+                                    <th>PhlebotomistAssignmentLineID</th>
+                                    <th>Percentage</th>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!--END details form-->
+<br />
+<select id="ActiveStatus" class="form-control col-sm-2">
+    <option value="0">All</option>
+    <option value="1" selected>Active</option>
+    <option value="2">Not active</option>
+</select>
+<br />
+<br />
+<table id="Phlebotomists" class="table table-striped table-bordered dataTable">
+    <thead>
+        <tr>
+            <th>First name</th>
+            <th>Last name</th>
+            <th>State</th>
+            <th>Telephone</th>
+            <th>EmployeeID</th>
+            <th></th>
+            <th></th>
+        </tr>
+    </thead>
+    <tfoot>
+        <tr>
+            <th>First name</th>
+            <th>Last name</th>
+            <th>State</th>
+            <th>Telephone</th>
+            <th>EmployeeID</th>
+            <th></th>
+            <th></th>
+        </tr>
+    </tfoot>
+</table>
+<script src="~/Phlebotomy/phlebotomy.js">
+</script>

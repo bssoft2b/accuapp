@@ -1,0 +1,485 @@
+﻿{
+   "ContextClassName": "WebdbContext",
+   "ContextNamespace": null,
+   "DefaultDacpacSchema": null,
+   "FilterSchemas": false,
+   "IncludeConnectionString": true,
+   "ModelNamespace": null,
+   "OutputContextPath": null,
+   "OutputPath": null,
+   "ProjectRootNamespace": "WebDB",
+   "Schemas": null,
+   "SelectedHandlebarsLanguage": 0,
+   "SelectedToBeGenerated": 0,
+   "Tables": [
+      {
+         "Name": "[dbo].[Accessions]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[AccountNotes]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[AccountRequests]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[Accounts]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[AddOns]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[AspNetClaimTypes]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[AspNetRoleClaims]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[AspNetRoles]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[AspNetUserClaims]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[AspNetUserLogins]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[AspNetUserRoles]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[AspNetUsers]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[AspNetUsers_bkp_10232019]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[AspNetUserTokens]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[Attachments]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[BillActions]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[BillingGroups]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[BillLogs]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[BillTypes]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[BlogItems]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[CacheKeys]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[CacheReports]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[CDCsUpdated]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[Charges]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[Coding_Activity]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[Coding_Codes]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[Coding_Invoices]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[Commissions]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[Commissions_bkup_Apr20]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[Commissions_Old]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[CommonDiagnosisCodes]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[Counties]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[CriticalResultLines]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[CriticalResults]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[Departments]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[DiagnosisCodes]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[DiagnosisHistoryLines]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[DiagnosisLines]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[DiagnosisRequestLines]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[DiagnosisRequests]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[DiagnosisRequests_20Feb2020]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[DiagnosisRequests_Bkup20Apr]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[DispatchContacts]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[DispatchStatuses]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[DispatchTasks]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[EmrNotes]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[EmrRequests]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[Finances]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[Finances_bkup_Apr20]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[Finances_Old]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[Groups]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[HardwareAccounts]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[HardwareItems]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[HardwareRequestAccounts]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[HardwareRequestNotes]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[HardwareRequests]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[HardwareReturnConditions]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[HardwareTypes]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[Insurances]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[InvoiceRequestDetails]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[InvoiceRequests]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[Invoices]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[Items]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[Managers]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[Notifications]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[PatientBills]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[PatientDemographics]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[PhysicianRequests]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[QBInvoiceItems]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[QBInvoices]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[QuickbooksSecrets]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[RegistrationDetails]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[ResultDeliveryOptions]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[RoleNotifications]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[RoleReferences]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[SalesExpenses]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[SalesReps]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[ServiceEmail]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[ServiceNotification]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[States]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[SubGroups]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[SupplyOrderDetails]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[SupplyOrders]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[t_bonus_SalaryParam_Excluded]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[t_bonus_type]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[t_bonus_type_bkup]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[t_bonusCalculation]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[t_bonusCalculation_2July]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[t_bonusCalculation_bkup290620]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[t_bonusParams]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[t_bonusParams_2July]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[t_bonusParams_bkup290620]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[t_bonusParams_bkupforbrandonsreagentcost]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[t_CDC_bkup_Apr2020]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[t_Coding_Team]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[t_gpbc_bonusCalculation_GroupLevel]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[t_gpbc_bonusParams_GroupLevel]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[t_gpbc_Rates]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[t_gpbc_Share_Rates]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[TempExport]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[Tests]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[TicketActions]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[TicketAttachments]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[TicketContacts]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[Tickets]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[UserNotifications]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[Vendors]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[sp_complete_dx_request]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[sp_generate_county_file]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[sp_get_coding_invoices]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[sp_get_coding_invoices_bkup10Apr]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[sp_get_coding_invoices_v1]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[sp_get_count_coding_invoices]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[sp_refresh_commissions_newplan]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[spWriteStringToFile]",
+         "ObjectType": 1
+      }
+   ],
+   "UseBoolPropertiesWithoutDefaultSql": false,
+   "UseDatabaseNames": true,
+   "UseDbContextSplitting": false,
+   "UseFluentApiOnly": false,
+   "UseHandleBars": false,
+   "UseInflector": true,
+   "UseLegacyPluralizer": false,
+   "UseNodaTime": false,
+   "UseSpatial": false
+}

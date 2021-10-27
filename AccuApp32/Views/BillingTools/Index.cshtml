@@ -1,0 +1,207 @@
+﻿@using DataModel.Finance
+@using AccuApp32MVC.Helper
+<style>
+    .val1, .val2 {
+        width: 40px;
+    }
+
+    .table_field {
+        border-radius: 3px;
+        border-style: solid;
+        border-collapse: separate !important;
+        border-width: 1px;
+        border-color: black;
+    }
+</style>
+<script>
+    var financeFields = null;
+    $(function () {
+        $.get({
+            url: "/Dictionary/financefields",
+            method: "GET",
+            dataType:"JSON",
+            success: function (data) {
+                financeFields = data;
+                var sel = $("#tdTemplate select.field_select");
+                $.each(data.BillDataFields, function () {
+                    sel.append($("<option/>").val("["+this.TableName+"].["+this.ColumnName+"]").text("["+this.ColumnName+"]").attr("dataType",this.ColumnType));
+                });
+            }
+        });
+    });
+</script>
+<div style="display:none" id="tdTemplate">
+    <table class="table-field">
+        <tr class="field_row">
+            <td class="visible">
+                <input type="checkbox" value="" title="visible" />
+            </td>
+            <td>
+                <select class="field_select"></select>
+            </td>
+            <td>
+                <button class="field_remove" title="delete">X</button>
+            </td>
+        </tr>
+        <tr>
+            <td style="width:25%">
+                <input class="val1" type="text" value="" />
+            </td>
+            <td>
+                <select class="where">
+                    <option value=""></option>
+                    <option value="like">like</option>
+                    <option value="between">between</option>
+                    <option value="=">=</option>
+                    <option value=">">&gt;</option>
+                    <option value=">=">&ge;</option>
+                    <option value="<">&lt;</option>
+                    <option value="<=">&le;</option>
+                </select>
+            </td>
+            <td style="width:25%">
+                <input class="val2" type="text" value="" style="visibility:hidden" />
+            </td>
+        </tr>
+        <tr>
+            <td colspan="3">
+                <select class="aggregate">
+                    <option value=""></option>
+                    <option value="SUM">SUM</option>
+                    <option value="MIN">MIN</option>
+                    <option value="MAX">MAX</option>
+                    <option value="COUNT">COUNT</option>
+                    <option value="COUNT DISTINCT">COUNT DISTINCT</option>
+                    <option value="AVG">AVG</option>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="2">
+                <div style="float:left;width:auto">
+                    <select class="orderby">
+                        <option value=""></option>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
+                        <option value="6">6</option>
+                    </select>
+                </div>
+                <div style="float:left;width:auto"><input type="checkbox" class="order-direct" /></div><div style="float:left;width:auto">Desc</div>
+            </td>
+        </tr>
+    </table>
+</div>
+<nav>
+    <div class="nav nav-tabs" id="nav-tab" role="tablist">
+        <a class="nav-item nav-link active" id="nav-settings-tab" data-toggle="tab" href="#nav-settings" role="tab" aria-controls="nav-settings" aria-selected="true">Settings</a>
+        <a class="nav-item nav-link" id="nav-reports-tab" data-toggle="tab" href="#nav-reports" role="tab" aria-controls="nav-reports" aria-selected="false">Reports</a>
+    </div>
+</nav>
+<div class="tab-content" id="nav-tabContent">
+    <div class="tab-pane fade show active" id="nav-settings" role="tabpanel" aria-labelledby="nav-settings-tab">
+        <div>
+        </div>
+    </div>
+    <div class="tab-pane fade" id="nav-reports" role="tabpanel" aria-labelledby="nav-reports-tab">
+        <button id="addField">Add field</button><br />
+        <table id="tbFields">
+            <tr>
+            </tr>
+        </table>
+    </div>
+</div>
+
+<button id="btnLoad">Load data...</button>
+<script>
+    $(function () {
+        $("#addField").click(function () {
+            $("#tbFields tr:first").append("<td>" + $("#tdTemplate").html() + "</td>");
+            //button remove
+            var btn = $("#tbFields tr:first>td:last").find("button.field_remove");
+            $(btn).click(function () {
+                var table = $(this).closest("table.table-field");
+                table.remove();
+            });
+            //select where
+            var selWhere = $("#tbFields tr:first>td:last").find("select.where");
+            $(selWhere).change(function (event) {
+                debugger;
+            });
+        });
+
+        $("#btnLoad").click(function (event) {
+            var query = createSql();
+            if (query == null)
+                return;
+            $.ajax({
+                url: "/billingtools/loaddata",
+                method: "POST",
+                dataType: "JSON",
+                data: query,
+                succes: function (response) {
+                    debugger;
+                },
+                error: function (jqHhr,textStatus,errorThown) {
+                    debugger;
+                }
+            });
+        });
+    });
+    function createSql() {
+
+        var fields = $("#tbFields table");
+        var field = new Array();
+        var alias = new Array();
+        var aggregate = new Array();
+        var orderBy =[];
+        var where = new Array();
+        var chkVisible = new Array();
+        var dataType = new Array();
+        var val1 = new Array();
+        var val2 = new Array();
+
+        for (var i = 0; i <fields.length; i++) {
+
+            chkVisible[i] = $(fields[i]).find("input[type=checkbox]").prop("checked");
+            field[i] = $(fields[i]).find("select.field_select").val();
+            alias[i] = $(fields[i]).find("select.field_select option:selected").html();
+            dataType[i] =$(fields[i]).find("select.field_select option:selected").attr("dataType");
+            aggregate[i] = $(fields[i]).find("select.aggregate").val();
+            aggregate[i] = aggregate[i] == null ? "" : aggregate[i];
+            val1[i] = $(fields[i]).find("input.val1").val();
+            val2[i] = $(fields[i]).find("input.val2").val();
+            order[i]=$(fields[i]).find("select.orderby").val();
+
+
+            if ((dataType[i] == "date" || dataType[i] == "text") && (aggregate[i] == "SUM" || aggregate[i] == "AVG"))
+            {
+                alert("Incompatible aggregate function and data type");
+                return null;
+            }
+
+            where[i] = $(fields[i]).find("select.where").val();
+
+            if ((where[i] == "like") && (dataType[i] == "date" || dataType[i] == "numeric")) {
+                alert("Incompatible filter expression and data type");
+                return null;
+            }
+
+        }
+        debugger;
+        var data = {
+            field: field,
+            dataType:dataType,
+            alias: alias,
+            aggregate: aggregate,
+            where: where,
+            val1: val1,
+            val2: val2,
+            orderBy:orderBy,
+            chkVisible:chkVisible
+        };
+        return data;
+    }
+</script>

@@ -1,0 +1,173 @@
+﻿@{
+    Layout = "~/Views/Shared/_LayoutAdminLte.cshtml";
+}
+<style>
+    #lstRoles {
+        columns:2!important;
+        -webkit-columns:auto;
+        -moz-columns:2;
+    }
+    .modal-lg{
+        max-width:80%!!important;
+    }
+</style>
+<!--user edit form-->
+<div class="modal fade" id="editUser" tabindex="-1" role="dialog" aria-labelledby="editUserModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="editUserModalLabel">Edit user</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form>
+          <div class="form-group">
+            <label for="txtLastName" class="col-form-label">Last name:</label>
+            <input type="text" class="form-control" id="txtLastName" readonly>
+          </div>
+          <div class="form-group">
+            <label for="txtFirstName" class="col-form-label">First name:</label>
+            <input type="text" class="form-control" id="txtFirstName" readonly>
+          </div>
+          <div class="form-group">
+            <label for="txtEmail" class="col-form-label">Email:</label>
+            <input type="text" class="form-control" id="txtEmail" readonly>
+          </div>
+          <div class="form-group">
+            <label for="txtEmail" class="col-form-label">Description:</label>
+
+            <textarea rows="4 "class="form-control" id="txtDescription"></textarea>
+          </div>
+          <div class="row form-group">
+              <div class="col-sm-6">
+                    <div>Role list:</div>
+                    <ul id="lstRoles" class="role-list border" style="list-style: none;padding-left:10px;">
+                    </ul>
+              </div>
+              <div class="col-sm-6">
+                  <div class="row">
+                      <div>
+                          Claims list:
+                      </div>
+                      &nbsp;
+                      <div>
+                          <button id="btnAddClaim" class="btn btn-secondary" >Add claim</button>
+                      </div>
+                      &nbsp;
+                      <div>
+                          <button id="btnRemoveClaim" class="btn btn-secondary" >Remove claim</button>
+                      </div>
+                   </div>
+                    <ul id="lstClaims" class="claims-list border black" style="list-style: none;padding-left:10px;">
+                    </ul>
+              </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary">Ok</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!--END user edit form-->
+<div class="row">
+    <div class="col-sm3">
+        <table id="Users" class="table table-striped table-bordered dataTable">
+            <thead>
+                <tr>
+                    <th>Last name</th>
+                    <th>First name</th>
+                    <th>Email</th>
+                    <th>Roles</th>
+                    <th></th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tfoot>
+                <tr>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+</div>
+<script>
+$(function(){
+
+    function fillUserEditForm(userId){
+
+        let response=$.ajax({
+            method:"GET",
+            url:"/Settings/getuser",
+            dataType:"JSON",
+            data:{userId:userId}
+        });
+
+        response.done(function(data){
+
+            $("#txtLastName").val(data.LastName);
+            $("#txtFirstName").val(data.FirstName);
+            $("#txtEmail").val(data.Email);
+
+            //fill rolelist
+            $("#lstRoles li").remove();
+            for(let i=0;i<data.Roles.length;i++){
+                $("#lstRoles").append("<li><input type='checkbox' "+((data.Roles[i].Check)?"checked":"")+" />&nbsp;<span>"+data.Roles[i].Name+"</span></li>");
+            }
+            //fill claims
+            $("#lstClaims li").remove();
+            for(let i=0;i<data.UserClaims.length;i++){
+                $("#lstClaims").append("<li><input type='checkbox' />&nbsp;<span>"+data.UserClaims[i].ClaimType+"</span>:&nbsp;<span>"+data.UserClaims[i].Value+"</span></li>");
+            }
+        }).then(function(){
+            $("#editUser").modal("show");
+        });
+    }
+
+   var userList= $("#Users").DataTable({
+        dom:"lpfrtip",
+        lengthChange:false,
+        serverSide:true,
+        processing:true,
+        rowId:"UserId",
+        ajax:{
+                url: "/Settings/usersjson",
+                type:"POST",
+                dataSrc:"data",
+            },
+            columns:[
+                {data:"LastName"},
+                {data:"FirstName"},
+                {data:"Email"},
+                {data:"RolesString",sortable:false},
+                {
+                    data:null,
+                    sortable:false,
+                    defaultContent:"<button class='btn btn-secondary btn-edit-user'>Edit</button>"
+                },
+                {
+                    data:null,
+                    sortable:false,
+                    defaultContent:"<button class='btn btn-secondary'>Delete</button>"
+                }
+            ]
+    });
+
+    userList.on('draw',function(){
+            $("#Users button.btn-edit-user").click(function(event){
+                let userId=$(event.target).closest("tr").attr("id");
+                fillUserEditForm(userId);
+            });
+    });
+
+});
+</script>

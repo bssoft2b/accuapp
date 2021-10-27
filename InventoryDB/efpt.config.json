@@ -1,0 +1,106 @@
+﻿{
+   "CodeGenerationMode": 0,
+   "ContextClassName": "InventoryContext",
+   "ContextNamespace": null,
+   "DefaultDacpacSchema": null,
+   "FilterSchemas": false,
+   "IncludeConnectionString": true,
+   "ModelNamespace": null,
+   "OutputContextPath": null,
+   "OutputPath": null,
+   "ProjectRootNamespace": "InventoryDB",
+   "Schemas": null,
+   "SelectedHandlebarsLanguage": 0,
+   "SelectedToBeGenerated": 0,
+   "Tables": [
+      {
+         "Name": "[dbo].[Accounts]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[DeliveryAddresses]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[DeliveryMethods]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[Groups]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[Items]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[LabDepartment]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[LabItems]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[LabSalesOrderLines]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[LabSalesOrders]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[PurchaseOrderLines]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[PurchaseOrders]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[ReturnOrderLines]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[ReturnOrders]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[SalesOrderLines]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[SalesOrders]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[SalesOrderStatuses]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[VendorItems]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[Vendors]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[sp_get_swab_count]",
+         "ObjectType": 1
+      }
+   ],
+   "UiHint": "BSSOFT2B.Inventory",
+   "UseBoolPropertiesWithoutDefaultSql": false,
+   "UseDatabaseNames": true,
+   "UseDbContextSplitting": false,
+   "UseFluentApiOnly": false,
+   "UseHandleBars": false,
+   "UseInflector": true,
+   "UseLegacyPluralizer": false,
+   "UseNoConstructor": false,
+   "UseNoNavigations": false,
+   "UseNodaTime": false,
+   "UseNullableReferences": false,
+   "UseSpatial": false
+}

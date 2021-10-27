@@ -1,0 +1,73 @@
+﻿{
+   "ContextClassName": "FINANCEContext",
+   "ContextNamespace": null,
+   "DefaultDacpacSchema": null,
+   "FilterSchemas": false,
+   "IncludeConnectionString": true,
+   "ModelNamespace": null,
+   "OutputContextPath": "Phlebotomy",
+   "OutputPath": "Phlebotomy",
+   "ProjectRootNamespace": "DataModel",
+   "Schemas": null,
+   "SelectedHandlebarsLanguage": 0,
+   "SelectedToBeGenerated": 0,
+   "Tables": [
+      {
+         "Name": "[dbo].[Accounts]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[FloatExpenses]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[FloatStops]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[Groups]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[Leads]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[PhlebotomistAssignmentLines]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[PhlebotomistAssignmentLog]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[PhlebotomistAssignments]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[PhlebotomistExpenses]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[PhlebotomistLeads]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[Phlebotomists]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[ProofOfTolls]",
+         "ObjectType": 0
+      }
+   ],
+   "UseBoolPropertiesWithoutDefaultSql": false,
+   "UseDatabaseNames": true,
+   "UseDbContextSplitting": false,
+   "UseFluentApiOnly": false,
+   "UseHandleBars": false,
+   "UseInflector": true,
+   "UseLegacyPluralizer": true,
+   "UseNodaTime": false,
+   "UseSpatial": false
+}

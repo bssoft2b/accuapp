@@ -1,0 +1,168 @@
+﻿@using DataModel.Finance
+@using System.Globalization
+@model List<sp_get_client_billingResult>
+@{
+    Layout = "~/Views/Shared/_LayoutAdminLte.cshtml";
+}
+
+<style>
+    td {
+        border: solid;
+        border-width: 1px;
+        border-color: black;
+        text-align: right;
+        padding:2px;
+    }
+</style>
+<form method="POST" action="/BillingTools/ClientBilling">
+    <table>
+        <thead>
+            <tr>
+                <th>
+                    From date
+                </th>
+                <th>
+                    To date
+                </th>
+                <th>
+                    Bill #
+                </th>
+                <th>
+                    Client #
+                </th>
+                <th>
+                    *
+                </th>
+            </tr>
+            <tr>
+                <th>
+                    <select name="dateBegin" id="dateBegin">
+                        @{
+
+                            var bill = ViewBag.Bill == null ? string.Empty : (string)ViewBag.Bill;
+                            var client = ViewBag.Client == null ? string.Empty : (string)ViewBag.Client;
+
+                            var dateBegin = (DateTime)ViewBag.dateBegin;
+                            var dateEnd = (DateTime)ViewBag.dateEnd;
+
+                            var startMonth = dateBegin.Month;
+                            var startYear = dateBegin.Year;
+                            var endMonth = dateEnd.Month;
+                            var endYear = dateEnd.Year;
+
+                            var startIndex = (startYear - 1) * 12 + startMonth;
+                            var endIndex = (endYear - 1) * 12 + endMonth;
+
+
+                            var minDate = (DateTime)ViewBag.minDate;
+                            var maxDate = (DateTime)ViewBag.maxDate;
+
+                            maxDate = dateEnd >= maxDate ? dateEnd : maxDate;
+
+                            var minMonth = minDate.Month;
+                            var minYear = minDate.Year;
+                            var maxMonth = maxDate.Month;
+                            var maxYear = maxDate.Year;
+
+                            var minIndex = (minYear - 1) * 12 + minMonth;
+                            var maxIndex = (maxYear - 1) * 12 + maxMonth;
+
+                            for (var i = minIndex; i <= maxIndex; i++)
+                            {
+                                var m1 = i % 12;
+                                m1 = m1 == 0 ? 12 : m1;
+                                var y1 = m1 < 12 ? (i / 12) + 1 : (i / 12);
+
+                                var monthName = CultureInfo.CurrentCulture.DateTimeFormat.GetAbbreviatedMonthName(m1);
+
+                                if (m1 == startMonth && y1 == startYear)
+                                {
+                                    <option value='@string.Format("{0}-{1}-1",y1,m1)'  selected>@string.Format("{0}-{1}", monthName, y1) </option>
+                                }
+                                else
+                                {
+                                    <option value='@string.Format("{0}-{1}-1",y1,m1)'>@string.Format("{0}-{1}", monthName, y1) </option>
+                                }
+                            }
+
+                        }
+                    </select>
+                </th>
+                <th>
+                    <select name="dateEnd" id="dateEnd">
+                        @for (var i = minIndex; i <= maxIndex; i++)
+                        {
+                            var m1 = i % 12;
+                            m1 = m1 == 0 ? 12 : m1;
+                            var y1 = m1 < 12 ? (i / 12) + 1 : (i / 12);
+
+                            var monthName = CultureInfo.CurrentCulture.DateTimeFormat.GetAbbreviatedMonthName(m1);
+
+
+                            if (m1 == endMonth && y1 == endYear)
+                            {
+                                <option value='@string.Format("{0}-{1}-1",y1,m1)' selected>@string.Format("{0}-{1}", monthName, y1) </option>
+                            }
+                            else
+                            {
+                                <option value='@string.Format("{0}-{1}-1",y1,m1)'>@string.Format("{0}-{1}", monthName, y1) </option>
+                            }
+                        }
+                    </select>
+                </th>
+                <th>
+                    <input type="text" name="bill" id="bill"  value="@bill"/>
+                </th>
+                <th>
+                    <input type="text" name="client" id="client" value="@client"/>
+                </th>
+                <th>
+                    <input type="submit" value="Get data" />
+                </th>
+            </tr>
+        </thead>
+    </table>
+
+    <table border="1">
+        <tr>
+            <td>Client</td>
+            @for (var i = startIndex; i <= endIndex; i++)
+            {
+                var m = i % 12;
+                m = m == 0 ? 12 : m;
+                var y = m < 12 ? (i / 12) + 1 : (i / 12);
+
+                var monthName = CultureInfo.CurrentCulture.DateTimeFormat.GetAbbreviatedMonthName(m);
+
+                <td>@string.Format("{0}-{1}", monthName, y)</td>
+            }
+        </tr>
+        @{
+            var clients = Model.OrderBy(t => t.Client).Select(t => t.Client).Distinct();
+
+            foreach (var c in clients)
+            {
+                <tr>
+                    <td>@c.Value</td>
+                    @for (var i = startIndex; i <= endIndex; i++)
+                    {
+                        var m = i % 12;
+                        m = m == 0 ? 12 : m;
+                        var y = m < 12 ? (i / 12) + 1 : (i / 12);
+
+                        var val = Model.FirstOrDefault(l => l.Client == c && l.ServiceMonth.Value.Year == y && l.ServiceMonth.Value.Month == m);
+
+                        if (val != null)
+                        {
+                            <td>@string.Format("{0:F2}", val.Balance)</td>
+                        }
+                        else
+                        {
+                            <td></td>
+                        }
+                    }
+                </tr>
+            }
+        }
+    </table>
+</form>

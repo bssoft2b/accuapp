@@ -1,0 +1,158 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - AccuApp31MVC</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/lib/jqueryui/jquery-ui.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" />
+
+    @*<link rel="stylesheet" href="~/lib/DataTables/datatables.min.css" />*@
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/lib/jqueryui/jquery-ui.min.js"></script>
+    @*<script src="~/lib/DataTables/DataTables-1.10.21/dattables.min.js"></script>*@
+    <script src="https://kit.fontawesome.com/be9322cb3c.js" crossorigin="anonymous"></script>
+    <script src="~/lib/sorttable/jquery.sorttable.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+</head>
+<body>
+    <div class="modal"><!-- Place at bottom of page --></div>
+    <header>
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+            <div style="margin:0px;width:100%">
+                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index"><img src="~/images/logo-blue.png" style="max-width:50%" /></a>
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                        aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="navbar-collapse collapse d-sm-inline-flex flex-sm-row-reverse">
+                    <div><partial name="_LoginPartial" /></div>
+                    @if (User.Identity.IsAuthenticated)
+                    {
+                        <div>
+                            <ul class="navbar-nav flex-grow-1">
+                                <li class="nav-item">
+                                    <div class="btn-group">
+                                        <button type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                            Billing Tools
+                                        </button>
+                                        <div class="dropdown-menu">
+                                            <a class="dropdown-item" href="#">My Alerts</a>
+                                            <a class="dropdown-item" asp-area="" asp-controller="BillingTools" asp-action="Report">Report</a>
+                                            <a class="dropdown-item" href="#">Phone Activity</a>
+                                            <a class="dropdown-item" href="#">Bill Types</a>
+                                            <a class="dropdown-item" href="#">Biller Activity</a>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li class="nav-item">
+                                    <div class="btn-group">
+                                        <button type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                            Coding Tools
+                                        </button>
+                                        <div class="dropdown-menu">
+                                            <a class="dropdown-item" href="#">Coding Invoices</a>
+                                            <a class="dropdown-item" href="#">Dx Change Necessa</a>
+                                            <a class="dropdown-item" href="#">Coding Letter</a>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li class="nav-item">
+                                    <div class="btn-group">
+                                        <button type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                            PL Reporting
+                                        </button>
+                                        <div class="dropdown-menu">
+                                            <a class="dropdown-item" href="#">Sales Groups</a>
+                                            <a class="dropdown-item" href="#">Accounts</a>
+                                            <a class="dropdown-item" href="#">Overhad Costs</a>
+                                            <a class="dropdown-item" href="#">POS Cups</a>
+                                            <a class="dropdown-item" href="#">Sales Rep Expenses</a>
+                                            <a class="dropdown-item" href="#">PL Data</a>
+                                            <a class="dropdown-item" href="#">PL Info</a>
+                                            <a class="dropdown-item" href="#">PL Payments</a>
+                                            <a class="dropdown-item" href="#">PL Charges</a>
+                                            <a class="dropdown-item" href="#">PL Reagents</a>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li class="nav-item">
+                                    <div class="btn-group">
+                                        <button type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                            EMR Managment
+                                        </button>
+                                        <div class="dropdown-menu">
+                                            <a class="dropdown-item" href="#">EMR Install</a>
+                                            <a class="dropdown-item" href="#">EMR Maint</a>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li class="nav-item">
+                                    <div class="btn-group">
+                                        <button type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                            Billing Managment
+                                        </button>
+                                        <div class="dropdown-menu">
+                                            <a class="dropdown-item" href="#">Billing Administration</a>
+                                            <a class="dropdown-item" href="#">Billing Groups</a>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li class="nav-item">
+                                    <div class="btn-group">
+                                        <button type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                            Executive
+                                        </button>
+                                        <div class="dropdown-menu">
+                                            <a class="dropdown-item" href="#">Prospective Reps</a>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li class="nav-item">
+                                    <div class="btn-group">
+                                        <button type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                            Marketing
+                                        </button>
+                                        <div class="dropdown-menu">
+                                            <a class="dropdown-item" href="#">Accounts</a>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li class="nav-item">
+                                    <div class="btn-group">
+                                        <button type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                            Services
+                                        </button>
+                                        <div class="dropdown-menu">
+                                            <a class="dropdown-item" href="#">Support</a>
+                                            <a class="dropdown-item" href="#">Change password</a>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li class="nav-item">
+                                    <div class="btn-group">
+                                        <button type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                            Executive
+                                        </button>
+                                        <div class="dropdown-menu">
+                                            <a class="dropdown-item" href="#">Administration</a>
+                                        </div>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                    }
+                </div>
+            </div>
+        </nav>
+    </header>
+    <div style="margin-left:10px;margin-right:10px;">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+    @RenderSection("Scripts", required: false)
+</body>
+</html>
