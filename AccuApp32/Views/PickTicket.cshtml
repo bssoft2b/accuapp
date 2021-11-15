@@ -1,0 +1,168 @@
+﻿@model List<AccuApp32MVC.Models.SalesOrderView>
+@{ 
+   
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pick Ticket - AccuApp</title>
+    <style>
+        table {
+            border-collapse: collapse;
+        }
+
+        th {
+            border-left: 1px solid black;
+            padding: 4px
+        }
+
+        td {
+            border-left: 1px solid black;
+            padding: 4px;
+        }
+
+        thead {
+            display: table-header-group
+        }
+
+        tfoot {
+            display: table-row-group
+        }
+
+        tr {
+            page-break-inside: avoid
+        }
+    </style>
+    <environment include="Development">
+        <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.css" />
+        <link rel="stylesheet" href="~/css/site.css" />
+    </environment>
+    <environment exclude="Development">
+        <link rel="stylesheet" href="https://ajax.aspnetcdn.com/ajax/bootstrap/3.3.7/css/bootstrap.min.css"
+              asp-fallback-href="~/lib/bootstrap/dist/css/bootstrap.min.css"
+              asp-fallback-test-class="sr-only" asp-fallback-test-property="position" asp-fallback-test-value="absolute" />
+        <link rel="stylesheet" href="~/css/site.min.css" asp-append-version="true" />
+    </environment>
+</head>
+<body>
+    @foreach (var item in Model)
+    {
+        <img src="~/images/header.png" style="display: inline-block" width=700 height=138 />
+        <div class="figure" style="display: inline; position:relative; top: 0px; right: 0px; height:158px; width:135px;">
+            @item.SalesOrder.SalesOrderID
+            <img src="data:image/png;base64, @item.BarCodeSvg" alt="Barcode doesnt work use number" style="display: inline; position:relative; top: 0px; right: 0px; height: 100px; width: 125px" />
+
+        </div>
+
+        <div style="padding-left:25px; padding-right:25px; page-break-after: always;">
+
+            <div class="row">
+                <div style="display:block">
+                    <div class="form-group" style="margin-left:0px; border:1px solid black; padding-left:5px;padding-right:0px;padding-bottom:5px;margin-right: 0px; width:49.75%; height:185px; display:inline-table">
+                        <span style="display: inline-table; padding-bottom: 5px;">
+                            <label class="control-label" style="font-size:18px;">Account # @item.SalesOrder.Account.AccountID</label><br />
+                            <label class="control-label">@item.SalesOrder.Account.Name</label><br />
+                            <label class="control-label">@item.SalesOrder.Account.Address</label><br />
+                            <label class="control-label">@item.SalesOrder.Account.Suite</label><br />
+                            <label class="control-label">@item.SalesOrder.Account.City, @item.SalesOrder.Account.State @item.SalesOrder.Account.Zip</label><br />
+                            <label class="control-label">Tel : @item.SalesOrder.Account.Telephone</label><br />
+                        </span>
+                    </div>
+                    <div class="form-group" style="margin-left:0px; border:1px solid black; padding-left:5px;padding-right:5px;padding-bottom:5px; width:49.75%; height:185px; display:inline-table">
+                        <span style="display: inline-table;">
+                            <label class="control-label">Ship To @item.SalesOrder.DeliveryAddress.DeliveryAddressName</label><br />
+                            <label class="control-label">Address : @item.SalesOrder.DeliveryAddress.Address</label><br />
+                            <label class="control-label">Suite : @item.SalesOrder.DeliveryAddress.Suite</label><br />
+                            <label class="control-label">City : @item.SalesOrder.DeliveryAddress.City</label><br />
+                            <label class="control-label">State : @item.SalesOrder.DeliveryAddress.State</label><br />
+                            <label class="control-label">Zip : @item.SalesOrder.DeliveryAddress.Zip</label><br />
+                            <label class="control-label">Order Date: @item.SalesOrder.DateCreated</label><br />
+                            <label class="control-label">Shipping Instructions : @item.SalesOrder.ShippingNote</label>
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+
+                <table class="table-bordered" style="width: 92%; margin-left:0px; padding:2px;border:1px solid black; font-size:18px;">
+                    <thead>
+                        <tr>
+                            <th>
+                                Line#
+                            </th>
+@*                            <th>
+                                @Html.DisplayNameFor(model => item.SalesOrderLines.ToList()[0].Item.ItemID)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => item.SalesOrderLines.ToList()[0].Item.ItemDescription)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => item.SalesOrderLines.ToList()[0].Item.ItemName)
+                            </th>
+                            <th>
+                                QTY
+                            </th>
+*@                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (int i = 0; i < item.SalesOrderLines.Count; i++)
+                        {
+                            <tr>
+                                <td>@(i + 1)</td>
+                                <td>@Html.DisplayFor(model => item.SalesOrderLines[i].ItemID)</td>
+@*                                <td>
+                                    @Html.DisplayFor(model => item.SalesOrderLines[i].Item.ItemName)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(model => item.SalesOrderLines[i].Item.ItemDescription)
+                                </td>
+*@                                <td>
+                                    @Html.DisplayFor(model => item.SalesOrderLines[i].OrderedQty)
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                 
+                </table>
+
+            </div>
+            <hr />
+            <div class="row">
+                <div class="form-group" style="margin-left:0px; border:1px solid black; padding-left:5px;padding-right:5px;padding-bottom:5px">
+                    <h4 class="control-label">Order Note </h4>
+                    <p>@item.SalesOrder.OrderNote</p>
+                </div>
+            </div>
+
+
+            <footer>
+                <p>&copy; 2018 Copy Right Accu Reference Medical Lab LLC.</p>
+            </footer>
+        </div>
+    }
+    <environment include="Development">
+        <script src="~/lib/jquery/dist/jquery.js"></script>
+        <script src="~/lib/bootstrap/dist/js/bootstrap.js"></script>
+        <script src="~/js/site.js" asp-append-version="true"></script>
+        <script src="https://cdn.jsdelivr.net/npm/signature_pad@2.3.2/dist/signature_pad.min.js"></script>
+    </environment>
+    <environment exclude="Development">
+        <script src="https://ajax.aspnetcdn.com/ajax/jquery/jquery-3.5.1.min.js"
+                asp-fallback-src="~/lib/jquery/dist/jquery.min.js"
+                asp-fallback-test="window.jQuery"
+                crossorigin="anonymous"
+                integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=">
+        </script>
+        <script src="https://ajax.aspnetcdn.com/ajax/bootstrap/3.3.7/bootstrap.min.js"
+                asp-fallback-src="~/lib/bootstrap/dist/js/bootstrap.min.js"
+                asp-fallback-test="window.jQuery && window.jQuery.fn && window.jQuery.fn.modal"
+                crossorigin="anonymous"
+                integrity="sha256-U5ZEeKfGNOja007MMD3YBI0A3OSZOQbeG6z2f2Y0hu8=">
+        </script>
+        <script src="~/js/site.min.js" asp-append-version="true"></script>
+    </environment>
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+</body>
+</html>
