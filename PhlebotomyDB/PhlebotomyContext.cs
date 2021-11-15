@@ -29,7 +29,10 @@ namespace PhlebotomyDB
         public virtual DbSet<PhlebotomistAssignmentLog> PhlebotomistAssignmentLogs { get; set; }
         public virtual DbSet<PhlebotomistExpense> PhlebotomistExpenses { get; set; }
         public virtual DbSet<PhlebotomistLead> PhlebotomistLeads { get; set; }
+        public virtual DbSet<PhlebotomistsOptions> PhlebotomistsOptions { get; set; }
         public virtual DbSet<ProofOfToll> ProofOfTolls { get; set; }
+
+        
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -241,6 +244,11 @@ namespace PhlebotomyDB
                     .HasForeignKey(d => d.LeadID)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK__Phlebotom__LeadI__286302EC");
+            });
+
+            modelBuilder.Entity<PhlebotomistsOptions>(entity =>
+            {
+                entity.HasKey(e =>e.EmployeeID);
             });
 
             modelBuilder.Entity<ProofOfToll>(entity =>
