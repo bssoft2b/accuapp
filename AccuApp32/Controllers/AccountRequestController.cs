@@ -15,6 +15,7 @@ using DinkToPdf;
 using AccuApp.Services;
 using DinkToPdf.Contracts;
 using AccuApp32MVC.Extensions;
+using AccuApp32.Services;
 
 namespace AccuApp32MVC.Controllers
 {
@@ -174,7 +175,7 @@ namespace AccuApp32MVC.Controllers
 
             Dictionary<int, string> gd = new Dictionary<int, string>();
 
-            foreach(var g in Group)
+            foreach (var g in Group)
             {
                 gd.Add(g.GroupID, g.GroupID.ToString() + " - " + g.Name);
             }
@@ -182,6 +183,24 @@ namespace AccuApp32MVC.Controllers
             ViewBag.Group = gd;
 
             return View("NewAccountRequests");
+        }
+        public IActionResult CompletedAccountRequests()
+        {
+
+            var Claims = User.Claims.Where(c => c.Type == "SalesRep").Select(c => c.Value).ToList();
+            var Groups = User.Claims.Where(c => c.Type == "Group").Select(c => c.Value).ToList();
+            var Group = _wdb.Groups.Where(g => Claims.Contains(g.SalesRep) || Claims.Contains(g.Manager) || Groups.Contains(g.GroupID.ToString()) || User.IsInRole("Phlebotomy Manager")).ToList();
+
+            Dictionary<int, string> gd = new Dictionary<int, string>();
+
+            foreach (var g in Group)
+            {
+                gd.Add(g.GroupID, g.GroupID.ToString() + " - " + g.Name);
+            }
+
+            ViewBag.Group = gd;
+
+            return View("CompletedAccountRequests");
         }
         public IActionResult NewAccountRequestsJson()
         {
@@ -198,7 +217,7 @@ namespace AccuApp32MVC.Controllers
 
             IQueryable<AccountRequest> accountRequests;
 
-            accountRequests = _wdb.AccountRequests.Include(x => x.Group).Where(t => (Claims.Contains(t.Group.SalesRep) || Claims.Contains(t.Group.Manager) || Groups.Contains(t.GroupID.ToString()) || User.IsInRole("Phlebotomy Manager")) && (t.RequestStatus ==0))
+            accountRequests = _wdb.AccountRequests.Include(x => x.Group).Where(t => (Claims.Contains(t.Group.SalesRep) || Claims.Contains(t.Group.Manager) || Groups.Contains(t.GroupID.ToString()) || User.IsInRole("Phlebotomy Manager")) && (t.RequestStatus == 0))
                 .OrderBy(t => t.RequestDate).Select(t => t);
 
             var recordsTotal = accountRequests.Count();
@@ -277,7 +296,8 @@ namespace AccuApp32MVC.Controllers
                 data = accountRequestsList.Select(t => new {
                     t.AccountRequestID,
                     t.RequestDate,
-                    t.ClientType,
+                    ClientType = t.ClientType == 3 ? "School - 3" : ((t.ClientType == 32) ? "Nursing Home - 32" : (t.ClientType == 12 ? "Home - 12" : (t.ClientType == 11 ? "Client - 11" : (t.ClientType == 13 ? "Assist Living - 13" : (t.ClientType == 15 ? "Mobile Unit - 15" : ""))))),
+                    ClientTypeCode = t.ClientType,
                     t.PracticeName,
                     t.Address,
                     t.Suite,
@@ -290,6 +310,112 @@ namespace AccuApp32MVC.Controllers
                     t.GroupID,
                     t.Group.SalesRep,
                     t.RequestedBy
+                }).ToList()
+            };
+            return Content(JsonConvert.SerializeObject(data));
+        }
+        public IActionResult CompletedAccountRequestsJson()
+        {
+
+            var draw = Convert.ToInt32(Request.Form["draw"].ToString());
+            var start = Convert.ToInt32(Request.Form["start"].ToString());
+            var length = Convert.ToInt32(Request.Form["length"].ToString());
+            var orderColumn = Convert.ToInt32(Request.Form["order[0][column]"].ToString());
+            var orderDirect = Request.Form["order[0][dir]"].ToString();
+            var searchValue = Request.Form["search[value]"].ToString();
+
+            var Claims = User.Claims.Where(t => t.Type == "SalesRep").Select(t => t.Value).ToList();
+            var Groups = User.Claims.Where(t => t.Type == "Group").Select(t => t.Value).ToList();
+
+            IQueryable<AccountRequest> accountRequests;
+
+            accountRequests = _wdb.AccountRequests.Include(x => x.Group).Where(t => (Claims.Contains(t.Group.SalesRep) || Claims.Contains(t.Group.Manager) || Groups.Contains(t.GroupID.ToString()) || User.IsInRole("Phlebotomy Manager")) && (t.RequestStatus == 1))
+                .OrderBy(t => t.RequestDate).Select(t => t);
+
+            var recordsTotal = accountRequests.Count();
+            var recordsFiltered = 0;
+
+            if (!string.IsNullOrEmpty(searchValue))
+            {
+                accountRequests = accountRequests.Where(t => Convert.ToString(t.AccountRequestID).Contains(searchValue) || t.PracticeName.Contains(searchValue));
+                recordsFiltered = accountRequests.Count();
+            }
+            else
+            {
+                recordsFiltered = recordsTotal;
+            }
+
+            if (orderColumn == 0)
+            {
+                accountRequests = (orderDirect == "asc") ? accountRequests.OrderBy(t => t.PracticeName) : accountRequests.OrderByDescending(t => t.PracticeName);
+            }
+            if (orderColumn == 1)
+            {
+                accountRequests = (orderDirect == "asc") ? accountRequests.OrderBy(t => t.ClientType) : accountRequests.OrderByDescending(t => t.ClientType);
+            }
+            if (orderColumn == 2)
+            {
+                accountRequests = (orderDirect == "asc") ? accountRequests.OrderBy(t => t.GroupID) : accountRequests.OrderByDescending(t => t.GroupID);
+            }
+            if (orderColumn == 3)
+            {
+                accountRequests = (orderDirect == "asc") ? accountRequests.OrderBy(t => t.Group.SalesRep) : accountRequests.OrderByDescending(t => t.Group.SalesRep);
+            }
+            if (orderColumn == 4)
+            {
+                accountRequests = (orderDirect == "asc") ? accountRequests.OrderBy(t => t.RequestedBy) : accountRequests.OrderByDescending(t => t.RequestedBy);
+            }
+            if (orderColumn == 5)
+            {
+                accountRequests = (orderDirect == "asc") ? accountRequests.OrderBy(t => t.RequestDate) : accountRequests.OrderByDescending(t => t.RequestDate);
+            }
+            if (orderColumn == 6)
+            {
+                accountRequests = (orderDirect == "asc") ? accountRequests.OrderBy(t => t.RequestStatus) : accountRequests.OrderByDescending(t => t.RequestStatus);
+            }
+            if (orderColumn == 7)
+            {
+                accountRequests = (orderDirect == "asc") ? accountRequests.OrderBy(t => t.ClientIDS) : accountRequests.OrderByDescending(t => t.ClientIDS);
+            }
+            if (orderColumn == 8)
+            {
+                accountRequests = (orderDirect == "asc") ? accountRequests.OrderBy(t => t.CompletedBy) : accountRequests.OrderByDescending(t => t.CompletedBy);
+            }
+            if (orderColumn == 9)
+            {
+                accountRequests = (orderDirect == "asc") ? accountRequests.OrderBy(t => t.CompletedDate) : accountRequests.OrderByDescending(t => t.CompletedDate);
+            }
+
+            var accountRequestsList = accountRequests.Skip(start).Take(length).ToList();
+
+            var data = new
+            {
+                draw = draw,
+                recordsTotal = recordsTotal,
+                recordsFiltered = recordsFiltered,
+                data = accountRequestsList.Select(t => new {
+                    t.AccountRequestID,
+                    t.RequestDate,
+                    ClientType = t.ClientType == 3 ? "School - 3" : ((t.ClientType == 32) ? "Nursing Home - 32" : (t.ClientType == 12 ? "Home - 12" : (t.ClientType == 11 ? "Client - 11" : (t.ClientType == 13 ? "Assist Living - 13" : (t.ClientType == 15 ? "Mobile Unit - 15" : ""))))),
+                    ClientTypeCode = t.ClientType,
+                    t.PracticeName,
+                    t.Address,
+                    t.Suite,
+                    t.City,
+                    t.State,
+                    t.Zip,
+                    t.Phone,
+                    t.OfficeContactName,
+                    t.ContactEmail,
+                    t.GroupID,
+                    t.Group.SalesRep,
+                    t.RequestedBy,
+                    t.ClientIDS,
+                    t.CompletedBy,
+                    t.CompletedDate,
+                    t.RequestStatus,
+                    t.WebUserName,
+                    t.WebUserPassword
                 }).ToList()
             };
             return Content(JsonConvert.SerializeObject(data));

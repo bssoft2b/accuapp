@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using SendGrid.Helpers.Mail;
 
-namespace AccuApp.Services
+namespace AccuApp32.Services
 {
     public interface IEmailSender
     {

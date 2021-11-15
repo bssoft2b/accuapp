@@ -15,6 +15,8 @@ using DinkToPdf;
 using AccuApp.Services;
 using DinkToPdf.Contracts;
 using AccuApp32MVC.Extensions;
+using AccuApp32.Services;
+using AccuApp32MVC.Services;
 
 namespace AccuApp32MVC.Controllers
 {

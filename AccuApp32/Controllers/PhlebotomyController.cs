@@ -1,4 +1,6 @@
-﻿using AccuApp32MVC.Models;
+﻿using AccuApp32.Services;
+using AccuApp32MVC.Models;
+using AccuApp32MVC.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -7,8 +9,6 @@ using PhlebotomyDB;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Cryptography.X509Certificates;
-using System.Threading.Tasks;
 using WebDB;
 using Account = PhlebotomyDB.Account;
 
@@ -22,20 +22,35 @@ namespace AccuApp32MVC.Controllers
         private readonly PhlebotomyContext _ph;
 
         private readonly UserManager<ApplicationUser> _userInManager;
+        private readonly IEmailSender _emailSender;
 
-        public PhlebotomyController(WebdbContext contextWebDb, WebdbContextProcedures contextProcedureWebDb, PhlebotomyContext contextPhlebotomy)
+        public PhlebotomyController(WebdbContext contextWebDb,
+                                    WebdbContextProcedures contextProcedureWebDb,
+                                    PhlebotomyContext contextPhlebotomy,
+                                    IEmailSender emailSender)
         {
             _wdb = contextWebDb;
             _contextProcedureWebDb = contextProcedureWebDb;
             _ph = contextPhlebotomy;
-        }
+            _emailSender = emailSender;
 
+        }
+        
         public IActionResult Index()
         {
             return View();
         }
         public IActionResult PhlebotomistsList()
         {
+            Dictionary<int, string> Leads = new Dictionary<int, string>();
+            var leads = _ph.Leads.OrderBy(t => t.LeadName).ToList();
+            foreach (var l in leads)
+            {
+                Leads.Add(l.LeadID, l.LeadID.ToString() + " - " + l.LeadName);
+            }
+
+            ViewBag.Leads = Leads;
+
             return View();
         }
         public IActionResult PhlebotomistsJson(int activeStatus)
@@ -51,12 +66,12 @@ namespace AccuApp32MVC.Controllers
 
 
             var phlebotomists = _ph.Phlebotomists.Select(x => x);
-            var Claims=User.Claims.Where(c => c.Type == "PhlebotomyLead").Select(t => t.Value).ToList();
+            var Claims = User.Claims.Where(c => c.Type == "PhlebotomyLead").Select(t => t.Value).ToList();
             //var ar = _ph.Phlebotomists.Join(_ph.PhlebotomistLeads.Where(r => Claims.Contains(r.LeadID.ToString())), l => l.EmployeeID, r => r.EmployeeID, (l, r) => l).Distinct();
 
-            if(activeStatus==1)
-                phlebotomists= phlebotomists.Where(x => (x.TerminationDate == null) || (x.TerminationDate > DateTime.Now));
-            else if(activeStatus==2)
+            if (activeStatus == 1)
+                phlebotomists = phlebotomists.Where(x => (x.TerminationDate == null) || (x.TerminationDate > DateTime.Now));
+            else if (activeStatus == 2)
                 phlebotomists = phlebotomists.Where(x => x.TerminationDate <= DateTime.Now);
 
             var recordsTotal = phlebotomists.Count();
@@ -65,7 +80,7 @@ namespace AccuApp32MVC.Controllers
             //filtering
             if (!string.IsNullOrEmpty(searchValue))
             {
-                phlebotomists = phlebotomists.Where(x => ((x.EmployeeID??"").ToLower().Contains(searchValue)) ||
+                phlebotomists = phlebotomists.Where(x => ((x.EmployeeID ?? "").ToLower().Contains(searchValue)) ||
                      ((x.FirstName ?? "").ToLower().Contains(searchValue.ToLower())) ||
                      ((x.LastName ?? "").ToLower().Contains(searchValue.ToLower())) ||
                      ((x.State ?? "").ToLower().Contains(searchValue.ToLower())) ||
@@ -105,7 +120,7 @@ namespace AccuApp32MVC.Controllers
 
             var phlebotomistList = phlebotomists.Skip(start).Take(length).ToList();
 
-            var data = new 
+            var data = new
             {
                 draw = draw,
                 recordsTotal = recordsTotal,
@@ -127,58 +142,7 @@ namespace AccuApp32MVC.Controllers
                 return Content(JsonConvert.SerializeObject("Error"));
             }
 
-            var leads = _ph.Leads.OrderBy(t => t.LeadName).ToList();
-            var leadNames = new List<string>();
-
-            var phlebotomistLeads = _ph.PhlebotomistLeads.Where(l => l.EmployeeID == employeeId).ToList();
-
-            foreach(var el in phlebotomistLeads)
-            {
-                var lead = _ph.Leads.FirstOrDefault(t => t.LeadID == el.LeadID);
-                if (lead != null)
-                    leadNames.Add(lead.LeadName);
-            }
-
-            var data = new PhlebotomistView
-            {
-                EmployeeID = phlebotomist.EmployeeID,
-                FirstName = phlebotomist.FirstName ?? "",
-                LastName = phlebotomist.LastName ?? "",
-                Address1 = phlebotomist.Address1 ?? "",
-                Address2 = phlebotomist.Address2 ?? "",
-                State = phlebotomist.State ?? "",
-                City = phlebotomist.City ?? "",
-                Telephone=phlebotomist.Telephone??"",
-                Zip= phlebotomist.Zip??"",
-                PhlebotomistLeads = _ph.PhlebotomistLeads.Where(l => l.EmployeeID == employeeId).Join(_ph.Leads, l => l.LeadID, r => r.LeadID, (l, r) => new { l, r }).Select(k => 
-                new ValueName
-                {
-                    Id = k.l.LeadID,
-                    Name = k.r.LeadName
-                }).OrderBy(m => m.Name).ToList(),
-                Leads=_ph.Leads.Select(t=>new ValueName
-                {
-                     Id=t.LeadID,
-                     Name=t.LeadName
-                }).OrderBy(l=>l.Name).ToList()
-            };
-            return Content(JsonConvert.SerializeObject(data));
-        }
-
-        public IActionResult GetPhlebotomistDetails(string employeeId)
-        {
-            var phlebotomistAndLines = _ph.Phlebotomists.Where(p => p.EmployeeID == employeeId).Join(_ph.PhlebotomistAssignments, l => l.EmployeeID, r => r.EmployeeID, (l, r) => new { l, r })
-                                        .Join(_ph.PhlebotomistAssignmentLines, l => l.r.PhlebotomistAssignmentID, r => r.PhlebotomistAssignmentID, (l, r) => new { l, r })
-                                        .Select(t => new
-                                        {
-                                            Phlebotomist = t.l.l,
-                                            Assignments = t.l.r,
-                                            AssignmentLines = t.r
-                                        });
-
-            var phlebotomist = phlebotomistAndLines.Select(x => x.Phlebotomist).Distinct().FirstOrDefault() ?? new Phlebotomist();
-            var PhlebotomistAssignmentLine = phlebotomistAndLines.Select(x => x.AssignmentLines).Distinct().OrderBy(x => x.PhlebotomistAssignmentID).ThenByDescending(x => x.Percentage)
-                .ToList() ?? new List<PhlebotomistAssignmentLine>();
+            var employeeOptions = _ph.PhlebotomistsOptions.FirstOrDefault(t => t.EmployeeID == employeeId);
 
             var data = new PhlebotomistView
             {
@@ -191,49 +155,140 @@ namespace AccuApp32MVC.Controllers
                 City = phlebotomist.City ?? "",
                 Telephone = phlebotomist.Telephone ?? "",
                 Zip = phlebotomist.Zip ?? "",
-                 PhlebotomistAssignmentLines= PhlebotomistAssignmentLine
+                Leads = _ph.PhlebotomistLeads.Where(l => l.EmployeeID == employeeId).Select(k => k.LeadID).ToArray(),
+                EmployeeStartDate = employeeOptions != null ? employeeOptions.EmployeeStartDate : null,
+                TerminationDate = phlebotomist.TerminationDate
+            };
+            return Content(JsonConvert.SerializeObject(data));
+        }
+        public IActionResult ExistsPhlebotomists(string employeeId)
+        {
+            var phlebotomist = _ph.Phlebotomists.FirstOrDefault(t => t.EmployeeID == employeeId);
+            var result = phlebotomist != null;
+            return Content(JsonConvert.SerializeObject(result));
+        }
+
+        public IActionResult GetPhlebotomistDetails(string employeeId)
+        {
+            var phlebotomistAndLines = _ph.Phlebotomists.Where(p => p.EmployeeID.ToLower() == employeeId.ToLower()).Join(_ph.PhlebotomistAssignments, l => l.EmployeeID, r => r.EmployeeID, (l, r) => new { l, r })
+                                        .Join(_ph.PhlebotomistAssignmentLines, l => l.r.PhlebotomistAssignmentID, r => r.PhlebotomistAssignmentID, (l, r) => new { l, r })
+                                        .Select(t => new
+                                        {
+                                            Phlebotomist = t.l.l,
+                                            Assignments = t.l.r,
+                                            AssignmentLines = t.r
+                                        });
+
+            var phlebotomist = phlebotomistAndLines.Select(x => x.Phlebotomist).Distinct().FirstOrDefault() ?? new Phlebotomist();
+            var PhlebotomistAssignmentLine = phlebotomistAndLines.Select(x => x.AssignmentLines).Distinct().OrderBy(x => x.PhlebotomistAssignmentID).ThenByDescending(x => x.Percentage)
+                .ToList() ?? new List<PhlebotomistAssignmentLine>();
+
+            var pho = _ph.PhlebotomistsOptions.FirstOrDefault(t => t.EmployeeID.ToLower() == employeeId.ToLower());
+            var employeeStartDate=pho!=null?pho.EmployeeStartDate:null;
+
+
+            var data = new PhlebotomistView
+            {
+                EmployeeID = phlebotomist.EmployeeID,
+                FirstName = phlebotomist.FirstName ?? "",
+                LastName = phlebotomist.LastName ?? "",
+                Address1 = phlebotomist.Address1 ?? "",
+                Address2 = phlebotomist.Address2 ?? "",
+                State = phlebotomist.State ?? "",
+                City = phlebotomist.City ?? "",
+                Telephone = phlebotomist.Telephone ?? "",
+                Zip = phlebotomist.Zip ?? "",
+                TerminationDate=phlebotomist.TerminationDate,
+                EmployeeStartDate= employeeStartDate,
+                PhlebotomistAssignmentLines = PhlebotomistAssignmentLine
             };
             return Content(JsonConvert.SerializeObject(data));
         }
 
-        public IActionResult SavePhlebotomist(string employeeId, string firstName, string lastName, string Address1, string Address2, string state, string city, string telephone, string zip, int[] phlebotomistsLead)
+        public IActionResult SavePhlebotomist(string employeeId, string firstName, string lastName, string Address1, string Address2, string state, string city, string telephone, string zip, int[] Leads,DateTime? terminationDate,DateTime employeeStartDate)
         {
-            var phlebotomist = _ph.Phlebotomists.FirstOrDefault(t => t.EmployeeID == employeeId);
+            var phlebotomist = _ph.Phlebotomists.FirstOrDefault(t => t.EmployeeID.ToLower() == employeeId.ToLower());
 
             if (phlebotomist != null)
             {
 
-                var oldLead = _ph.PhlebotomistLeads.Where(t => t.EmployeeID == employeeId).Select(t => t.LeadID).ToArray();
-
-                var newLead = phlebotomistsLead.Except(oldLead);
-                var delLead = oldLead.Except(phlebotomistsLead);
-
-                var newPhlebotomistLeads = newLead.Select(t => new PhlebotomistLead
-                {
-                    EmployeeID = employeeId,
-                    LeadID = t
-                }).ToList();
-
-
-                var delPhlebotomistLeads = _ph.PhlebotomistLeads.Where(t => t.EmployeeID == employeeId).ToList().Join(delLead, l => l.LeadID, r => r, (l, r) => l).ToList();
-
-                _ph.PhlebotomistLeads.RemoveRange(delPhlebotomistLeads);
-                _ph.PhlebotomistLeads.AddRange(newPhlebotomistLeads);
-
+                phlebotomist.EmployeeID = employeeId;
+                phlebotomist.FirstName = firstName;
+                phlebotomist.LastName = lastName;
                 phlebotomist.Address1 = Address1;
                 phlebotomist.Address2 = Address2;
                 phlebotomist.State = state;
                 phlebotomist.City = city;
                 phlebotomist.Telephone = telephone;
                 phlebotomist.Zip = zip;
+                phlebotomist.TerminationDate = terminationDate;
 
-                _ph.SaveChanges();
-                return Content(JsonConvert.SerializeObject("OK"));
             }
             else
             {
-                return Content(JsonConvert.SerializeObject("Error"));
+                phlebotomist = new Phlebotomist();
+
+                phlebotomist.EmployeeID = employeeId;
+                phlebotomist.FirstName = firstName;
+                phlebotomist.LastName = lastName;
+                phlebotomist.Address1 = Address1;
+                phlebotomist.Address2 = Address2;
+                phlebotomist.State = state;
+                phlebotomist.City = city;
+                phlebotomist.Telephone = telephone;
+                phlebotomist.Zip = zip;
+                phlebotomist.TerminationDate = terminationDate;
+
+                _ph.Phlebotomists.Add(phlebotomist);
             }
+
+            var phlebOption = _ph.PhlebotomistsOptions.FirstOrDefault(t => t.EmployeeID.ToLower() == employeeId.ToLower());
+
+            if (phlebOption != null)
+            {
+                phlebOption.EmployeeStartDate = employeeStartDate;
+            } else
+            {
+                phlebOption=new PhlebotomistsOptions();
+                phlebOption.EmployeeID = phlebotomist.EmployeeID;
+                phlebOption.EmployeeStartDate = employeeStartDate;
+
+                _ph.PhlebotomistsOptions.Add(phlebOption);
+            }
+
+            var oldLead = _ph.PhlebotomistLeads.Where(t => t.EmployeeID.ToLower() == employeeId.ToLower()).Select(t => t.LeadID).ToArray();
+
+            var newLead = Leads.Except(oldLead);
+            var delLead = oldLead.Except(Leads);
+
+            var newPhlebotomistLeads = newLead.Select(t => new PhlebotomistLead
+            {
+                EmployeeID = employeeId,
+                LeadID = t
+            }).ToList();
+
+            var delPhlebotomistLeads = _ph.PhlebotomistLeads.Where(t => t.EmployeeID == employeeId).ToList().Join(delLead, l => l.LeadID, r => r, (l, r) => l).ToList();
+
+            _ph.PhlebotomistLeads.RemoveRange(delPhlebotomistLeads);
+            _ph.PhlebotomistLeads.AddRange(newPhlebotomistLeads);
+
+            _ph.SaveChanges();
+
+            //send notification
+
+            var recipients = new List<string>();
+
+            //recipients.Add("latoya.chambersclarke@accureference.com");
+            //recipients.Add("carol.perez@accureference.com");
+            //recipients.Add("sumesh.vija@accureference.com");
+
+            //foreach (var e in recipients)
+            //{
+            //    _emailSender.PhlebCreateNotification(e, phlebotomist.EmployeeID, User.Identity.Name);
+            //}
+
+
+            return Content(JsonConvert.SerializeObject("OK"));
         }
 
         public IActionResult DispatchTasks()
@@ -254,13 +309,13 @@ namespace AccuApp32MVC.Controllers
 
 
             var Claims = User.Claims.Where(c => c.Type == "Account").Select(t => t.Value).ToList();
-            var GrpClaims = User.Claims.Where(c => c.Type == "Group").Select(t=>t.Value).ToList();
+            var GrpClaims = User.Claims.Where(c => c.Type == "Group").Select(t => t.Value).ToList();
 
             var tasks = _wdb.DispatchTasks.Join(_wdb.Accounts, l => l.AccountID, r => r.AccountID, (l, r) => new { l, r }).Join(_wdb.DispatchStatuses, l => l.l.DispatchStatusID, r => r.DispatchStatusID, (l, r) => new { l, r });
 
             if (status.HasValue && status.Value == 2)
                 tasks = tasks.Where(x => x.l.l.DispatchStatusID == 1);
-            else if ( status.HasValue && status.Value == 3)
+            else if (status.HasValue && status.Value == 3)
                 tasks = tasks.Where(x => x.l.l.DispatchStatusID == 2);
 
             var recordsTotal = tasks.Count();
@@ -269,15 +324,15 @@ namespace AccuApp32MVC.Controllers
             //filtering
             if (!string.IsNullOrEmpty(searchValue))
             {
-                var culture =new System.Globalization.CultureInfo("en-US");
+                var culture = new System.Globalization.CultureInfo("en-US");
                 tasks = tasks.Where(
                           x => x.l.l.DispatchTaskID.ToString().Contains(searchValue)
-                     ||  (x.l.r.AccountID.ToString().Contains(searchValue))
-                     ||  (x.l.r.Name.ToLower().Contains(searchValue.ToLower()))
-                     ||  (x.l.r.Telephone.Contains(searchValue))
-                     ||  (x.l.l.PickupTime.Contains(searchValue))
-                     ||  (x.l.l.ContactName.ToLower().Contains(searchValue.ToLower()))
-                     ||  (x.r.DispatchStatusName.Contains(searchValue))
+                     || (x.l.r.AccountID.ToString().Contains(searchValue))
+                     || (x.l.r.Name.ToLower().Contains(searchValue.ToLower()))
+                     || (x.l.r.Telephone.Contains(searchValue))
+                     || (x.l.l.PickupTime.Contains(searchValue))
+                     || (x.l.l.ContactName.ToLower().Contains(searchValue.ToLower()))
+                     || (x.r.DispatchStatusName.Contains(searchValue))
                      //||  (Convert.ToString(x.l.l.LastWorked, culture).Contains(searchValue))
                      );
 
@@ -340,88 +395,123 @@ namespace AccuApp32MVC.Controllers
                 draw = draw,
                 recordsTotal = recordsTotal,
                 recordsFiltered = recordsFiltered,
-                data = tasksList.Select(t=>new
+                data = tasksList.Select(t => new
                 {
-                    DispatchStatusId=t.l.l.DispatchStatusID,
-                    DispatchTaskId=t.l.l.DispatchTaskID,
-                    AccountId=t.l.l.AccountID,
-                    Name=t.l.r.Name,
-                    Telephone=t.l.r.Telephone,
-                    Stat=t.l.l.Stat,
-                    ReasonID=t.l.l.ReasonID,
-                    Driver=t.l.l.ContactName,
-                    PickupTime=t.l.l.PickupTime,
-                    LastWorked=t.l.l.LastWorked,
-                    CreatedBy=t.l.l.CreatedBy
+                    DispatchStatusId = t.l.l.DispatchStatusID,
+                    DispatchTaskId = t.l.l.DispatchTaskID,
+                    AccountId = t.l.l.AccountID,
+                    Name = t.l.r.Name,
+                    Telephone = t.l.r.Telephone,
+                    Stat = t.l.l.Stat,
+                    ReasonID = t.l.l.ReasonID,
+                    Driver = t.l.l.ContactName,
+                    PickupTime = t.l.l.PickupTime,
+                    LastWorked = t.l.l.LastWorked,
+                    CreatedBy = t.l.l.CreatedBy
                 }).ToList()
             };
             return Content(JsonConvert.SerializeObject(data));
         }
         public IActionResult GetDispatchTask(int dispatchTaskId)
         {
-            var tsk = _wdb.DispatchTasks.Join(_wdb.Accounts, l => l.AccountID, r => r.AccountID, (l, r) => new { l, r }).Join(_wdb.DispatchStatuses, l => l.l.DispatchStatusID, r => r.DispatchStatusID, (l, r) => new { l, r }).FirstOrDefault(t=>t.l.l.DispatchTaskID==dispatchTaskId);
+            var tsk = _wdb.DispatchTasks.Join(_wdb.Accounts, l => l.AccountID, r => r.AccountID, (l, r) => new { l, r }).Join(_wdb.DispatchStatuses, l => l.l.DispatchStatusID, r => r.DispatchStatusID, (l, r) => new { l, r }).FirstOrDefault(t => t.l.l.DispatchTaskID == dispatchTaskId);
             var dispatchContacts = _wdb.DispatchContacts.Where(t => t.DispatchTaskID == dispatchTaskId).ToList();
             var dispatchStatuses = _wdb.DispatchStatuses.ToList();
 
             var data = new
             {
-                DispatchTaskID=tsk.l.l.DispatchTaskID,
-                AccountID=tsk.l.l.AccountID,
+                DispatchTaskID = tsk.l.l.DispatchTaskID,
+                AccountID = tsk.l.l.AccountID,
                 AddressLine1 = tsk.l.l.AddressLine1,
                 AddressLine2 = tsk.l.l.AddressLine2,
-                City=tsk.l.l.City,
-                State=tsk.l.l.State,
-                Zip=tsk.l.l.Zip,
-                ReasonID=tsk.l.l.ReasonID,
-                Driver=tsk.l.l.ContactName,
-                PickupTime=tsk.l.l.PickupTime,
-                Stat=tsk.l.l.Stat,
-                DispatchStatusID=tsk.l.l.DispatchStatusID,
-                DispatchStatuses = dispatchStatuses.Select(l => new {
-                    Id = l.DispatchStatusID,
-                    Name = l.DispatchStatusName
-                }).ToList(),
+                City = tsk.l.l.City,
+                State = tsk.l.l.State,
+                Zip = tsk.l.l.Zip,
+                ReasonID = tsk.l.l.ReasonID,
+                Driver = tsk.l.l.ContactName,
+                PickupTime = tsk.l.l.PickupTime,
+                Stat = tsk.l.l.Stat,
+                DispatchStatusID = tsk.l.l.DispatchStatusID,
                 Notes = tsk.l.l.Notes,
-                DispatchContactEmail= dispatchContacts.Select(l=>new { 
-                    Id=l.DispatchContactID,
-                    Email=l.DispatchContactEmail
+                DispatchContactEmail = dispatchContacts.Select(l => new
+                {
+                    Id = l.DispatchContactID,
+                    Email = l.DispatchContactEmail
                 }).ToList()
             };
             return Content(JsonConvert.SerializeObject(data));
         }
-        public IActionResult SaveDispatchTask(int dispatchTaskID,int accountID,string Address1, string Address2, string state, string city,string zip,int? reasonID,string driver, string pickupTime,bool stat,int dispatchStatusID,List<DispatchContact> dispatchContactEmails)
+        public IActionResult SaveDispatchTask(int dispatchTaskID, int accountID, string Address1, string Suite, string state, string city, string zip, int? reasonID, string driver, string pickupTime, bool stat, int dispatchStatusID, List<DispatchContact> dispatchContactEmails)
         {
             var dispatchTask = _wdb.DispatchTasks.FirstOrDefault(t => t.DispatchTaskID == dispatchTaskID);
 
             if (dispatchTask != null)
             {
-
-                var oldContactEmail =_wdb.DispatchContacts.Where(t => t.DispatchTaskID == dispatchTaskID).ToList();
-
-                var newContactEmails = dispatchContactEmails.Where(t => t.DispatchContactID == 0).ToList();
-                var cr = oldContactEmail.Join(dispatchContactEmails, l => l.DispatchContactID, r => r.DispatchContactID, (l, r) => l).ToList();
-                var delContactEmails = oldContactEmail.Except(cr).ToList();
-
-                _wdb.DispatchContacts.RemoveRange(delContactEmails);
-                _wdb.DispatchContacts.AddRange(newContactEmails);
-
                 dispatchTask.AddressLine1 = Address1;
-                dispatchTask.AddressLine2 = Address2;
+                dispatchTask.AddressLine2 = Suite;
                 dispatchTask.State = state;
                 dispatchTask.City = city;
                 dispatchTask.Zip = zip;
                 dispatchTask.ReasonID = reasonID;
                 dispatchTask.ContactName = driver;
+                dispatchTask.PickupTime = pickupTime;
                 dispatchTask.Stat = stat;
                 dispatchTask.DispatchStatusID = dispatchStatusID;
-
-                _wdb.SaveChanges();
-                return Content(JsonConvert.SerializeObject("OK"));
+                dispatchTask.UpdatedBy = User.Identity.Name;
+                dispatchTask.UpdatedDate = DateTime.Now;
             }
             else
             {
-                return Content(JsonConvert.SerializeObject("Error"));
+                dispatchTask = new DispatchTask();
+
+                dispatchTask.LastWorked = DateTime.Now;
+                dispatchTask.ContactName = User.Identity.Name;
+                dispatchTask.DispatchStatusID = dispatchStatusID;
+                dispatchTask.CreatedBy = User.Identity.Name.ToLower();
+                dispatchTask.CreatedDate = DateTime.Now;
+                dispatchTask.AddressLine1 = Address1;
+                dispatchTask.AddressLine2 = Suite;
+                dispatchTask.State = state;
+                dispatchTask.City = city;
+                dispatchTask.Zip = zip;
+                dispatchTask.ReasonID = reasonID;
+                dispatchTask.Stat = stat;
+
+                _wdb.DispatchTasks.Add(dispatchTask);
+
+                _wdb.SaveChanges();
             }
+
+            foreach(var de in dispatchContactEmails)
+            {
+                de.DispatchTaskID = dispatchTask.DispatchTaskID;
+            }
+
+            var oldContactEmail = _wdb.DispatchContacts.Where(t => t.DispatchTaskID == dispatchTaskID).ToList();
+            var newContactEmails = dispatchContactEmails.Where(t => t.DispatchContactID == 0).ToList();
+            var cr = oldContactEmail.Join(dispatchContactEmails, l => l.DispatchContactID, r => r.DispatchContactID, (l, r) => l).ToList();
+            var delContactEmails = oldContactEmail.Except(cr).ToList();
+
+            _wdb.DispatchContacts.RemoveRange(delContactEmails);
+            _wdb.DispatchContacts.AddRange(newContactEmails);
+
+            _wdb.SaveChanges();
+
+            string name = _wdb.Accounts.SingleOrDefault(x => x.AccountID == dispatchTask.AccountID).Name.ToString();
+            string statusName = _wdb.DispatchStatuses.SingleOrDefault(x => x.DispatchStatusID == dispatchTask.DispatchStatusID).DispatchStatusName;
+            var DispatchContacts = _wdb.DispatchContacts.Where(t => t.DispatchTaskID == dispatchTask.DispatchTaskID).ToList();
+
+            if (dispatchTask.DispatchStatusID == 2)
+            {
+                _emailSender.SendEmailAssignedNotification(name, "Dispatch@accureference.com", User.Identity.Name, dispatchTask.Notes, statusName);
+                foreach (var el in DispatchContacts)
+                {
+                    _emailSender.SendEmailAssignedNotification(name, el.DispatchContactEmail, User.Identity.Name, dispatchTask.Notes, statusName);
+                }
+            }
+
+
+            return Content(JsonConvert.SerializeObject("OK"));
         }
 
         public IActionResult AssignmentManagment()
@@ -437,6 +527,7 @@ namespace AccuApp32MVC.Controllers
             var orderColumn = Convert.ToInt32(Request.Form["order[0][column]"].ToString());
             var orderDirect = Request.Form["order[0][dir]"].ToString();
             var searchValue = Request.Form["search[value]"].ToString();
+            searchValue = searchValue.Trim().ToUpper();
 
             IQueryable<PhlebotomistAssignment> phlebotomistsAssignment = _ph.PhlebotomistAssignments.Include(x => x.Employee);
 
@@ -466,13 +557,13 @@ namespace AccuApp32MVC.Controllers
                                                join grp2 in _ph.Groups on acct.GroupID equals grp2.GroupID into gj3
                                                from grp3 in gj3.DefaultIfEmpty()
                                                where (
-                                               (p.EmployeeID.ToLower().Contains(searchValue.ToLower())) || (p.Month == null ? false : p.Month.ToString().Contains(searchValue))
+                                               (p.EmployeeID.ToUpper().Contains(searchValue)) || (p.Month == null ? false : p.Month.ToString().Contains(searchValue))
                                                || (a == null ? false : ((a.AccountID == null ? false : a.AccountID.ToString() == (searchValue)) || (a.GroupID == null ? false : a.GroupID.ToString() == (searchValue))))
-                                               || ((e.FirstName == null || e.FirstName == "" ? false : e.FirstName.ToUpper().Contains(searchValue.ToUpper())) || (e.LastName == null || e.LastName == "" ? false : e.LastName.ToUpper().Contains(searchValue.ToUpper())) ||                (e.Telephone == null || e.Telephone == "" ? false : e.Telephone.Contains(searchValue)) ||
-                                                (e.State == null ? false : e.State.ToUpper().Contains(searchValue.ToUpper())))
-                                               || ((acct == null ? false : (acct.Name.ToUpper().Contains(searchValue.ToUpper()) || acct.GroupID.ToString() == (searchValue.ToUpper()))))
-                                               || ((grp3 == null ? false : (grp3.SalesRep.ToUpper().Contains(searchValue.ToUpper()) || grp3.Name.ToUpper().Contains(searchValue.ToUpper()))))
-                                               || ((grp1 == null ? false : (grp1.SalesRep.ToUpper().Contains(searchValue.ToUpper()) || grp1.Name.ToUpper().Contains(searchValue.ToUpper()))))
+                                               || ((e.FirstName == null || e.FirstName == "" ? false : e.FirstName.ToUpper().Contains(searchValue)) || (e.LastName == null || e.LastName == "" ? false : e.LastName.ToUpper().Contains(searchValue)) || (e.Telephone == null || e.Telephone == "" ? false : e.Telephone.Contains(searchValue)) ||
+                                                (e.State == null ? false : e.State.ToUpper().Contains(searchValue)))
+                                               || ((acct == null ? false : (acct.Name.ToUpper().Contains(searchValue) || acct.GroupID.ToString() == (searchValue))))
+                                               || ((grp3 == null ? false : (grp3.SalesRep.ToUpper().Contains(searchValue) || grp3.Name.ToUpper().Contains(searchValue))))
+                                               || ((grp1 == null ? false : (grp1.SalesRep.ToUpper().Contains(searchValue) || grp1.Name.ToUpper().Contains(searchValue))))
                                                )
                                                select p);
 
@@ -485,7 +576,7 @@ namespace AccuApp32MVC.Controllers
             }
             else if (User.IsInRole("Phlebotomy User"))
             {
-                var Claims = User.Claims.Where(c=>c.Type == "PhlebotomyLead").Select(c=>c.Value).ToList();
+                var Claims = User.Claims.Where(c => c.Type == "PhlebotomyLead").Select(c => c.Value).ToList();
 
                 if (!string.IsNullOrEmpty(searchValue))
                 {
@@ -521,20 +612,21 @@ namespace AccuApp32MVC.Controllers
                                                from grp3 in gj3.DefaultIfEmpty()
                                                join pl in _ph.PhlebotomistLeads on p.EmployeeID equals pl.EmployeeID
                                                where
-                                               Claims.Contains(pl.LeadID.ToString()) 
+                                               Claims.Contains(pl.LeadID.ToString())
                                                && (
-                                               (p.EmployeeID.ToLower().Contains(searchValue.ToLower())) || (p.Month == null ? false : p.Month.ToString().Contains(searchValue))
+                                               (p.EmployeeID.ToUpper().Contains(searchValue)) || (p.Month == null ? false : p.Month.ToString().Contains(searchValue))
                                                || (a == null ? false : ((a.AccountID == null ? false : a.AccountID.ToString() == (searchValue)) || (a.GroupID == null ? false : a.GroupID.ToString() == (searchValue))))
-                                               || ((e.FirstName == null || e.FirstName == "" ? false : e.FirstName.ToUpper().Contains(searchValue.ToUpper())) || (e.LastName == null || e.LastName == "" ? false : e.LastName.ToUpper().Contains(searchValue.ToUpper())) || (e.Telephone == null || e.Telephone == "" ? false : e.Telephone.Contains(searchValue)) ||
-                                                (e.State == null ? false : e.State.ToUpper().Contains(searchValue.ToUpper())))
-                                               || ((acct == null ? false : (acct.Name.ToUpper().Contains(searchValue.ToUpper()) || acct.GroupID.ToString() == (searchValue.ToUpper()))))
-                                               || ((grp3 == null ? false : (grp3.SalesRep.ToUpper().Contains(searchValue.ToUpper()) || grp3.Name.ToUpper().Contains(searchValue.ToUpper()))))
-                                               || ((grp1 == null ? false : (grp1.SalesRep.ToUpper().Contains(searchValue.ToUpper()) || grp1.Name.ToUpper().Contains(searchValue.ToUpper()))))
+                                               || ((e.FirstName == null || e.FirstName == "" ? false : e.FirstName.ToUpper().Contains(searchValue)) || (e.LastName == null || e.LastName == "" ? false : e.LastName.ToUpper().Contains(searchValue)) || (e.Telephone == null || e.Telephone == "" ? false : e.Telephone.Contains(searchValue)) ||
+                                                (e.State == null ? false : e.State.ToUpper().Contains(searchValue)))
+                                               || ((acct == null ? false : (acct.Name.ToUpper().Contains(searchValue) || acct.GroupID.ToString() == (searchValue))))
+                                               || ((grp3 == null ? false : (grp3.SalesRep.ToUpper().Contains(searchValue) || grp3.Name.ToUpper().Contains(searchValue))))
+                                               || ((grp1 == null ? false : (grp1.SalesRep.ToUpper().Contains(searchValue) || grp1.Name.ToUpper().Contains(searchValue))))
                                                )
                                                select p);
 
-                    recordsFiltered =phlebotomistsAssignment.Count();
-                } else
+                    recordsFiltered = phlebotomistsAssignment.Count();
+                }
+                else
                 {
 
                     phlebotomistsAssignment = phlebotomistsAssignment
@@ -575,7 +667,7 @@ namespace AccuApp32MVC.Controllers
             }
 
 
-            var phlebotomistsAssignmentList = phlebotomistsAssignment.Skip(start).Take(length).ToList(); 
+            var phlebotomistsAssignmentList = phlebotomistsAssignment.Skip(start).Take(length).ToList();
 
             var data = new
             {
@@ -584,15 +676,15 @@ namespace AccuApp32MVC.Controllers
                 recordsFiltered = recordsFiltered,
                 data = phlebotomistsAssignmentList.Select(t => new
                 {
-                    PhlebotomistAssignmentID=t.PhlebotomistAssignmentID,
-                    Confirmed=t.Confirmed,
-                    EmployeeID=t.EmployeeID,
-                    FirstName=t.Employee.FirstName,
-                    LastName=t.Employee.LastName,
-                    State=t.Employee.State,
-                    Telephone=t.Employee.Telephone,
-                    Month=t.Month.Month,
-                    Year=t.Month.Year
+                    PhlebotomistAssignmentID = t.PhlebotomistAssignmentID,
+                    Confirmed = t.Confirmed,
+                    EmployeeID = t.EmployeeID,
+                    FirstName = t.Employee.FirstName,
+                    LastName = t.Employee.LastName,
+                    State = t.Employee.State,
+                    Telephone = t.Employee.Telephone,
+                    Month = t.Month.Month,
+                    Year = t.Month.Year
                 }).ToList()
             };
 
@@ -630,18 +722,55 @@ namespace AccuApp32MVC.Controllers
 
         public IActionResult GetEmployeeListJson(string searchValue)
         {
-            var data = _ph.Phlebotomists.Where(t => t.FirstName.Contains(searchValue) || t.LastName.Contains(searchValue) || t.EmployeeID.Contains(searchValue)).OrderBy(t => t.FirstName).ThenBy(t => t.LastName).Select(t=>new
+            var data = _ph.Phlebotomists.Where(t => t.FirstName.Contains(searchValue) || t.LastName.Contains(searchValue) || t.EmployeeID.Contains(searchValue)).OrderBy(t => t.FirstName).ThenBy(t => t.LastName).Select(t => new
             {
-                EmployeeID=t.EmployeeID,
-                FirstName=t.FirstName,
-                LastName=t.LastName,
-                Telephone=t.Telephone,
-                State=t.State
+                EmployeeID = t.EmployeeID,
+                FirstName = t.FirstName,
+                LastName = t.LastName,
+                Telephone = t.Telephone,
+                State = t.State
             }).Take(100).ToList();
 
             return Content(JsonConvert.SerializeObject(data));
         }
-        public IActionResult GetAccountsGroupJson(string type,string searchValue)
+        public IActionResult GetEmployeeList(string filter)
+        {
+            var searchValue = filter.Trim().ToUpper();
+            var data = _ph.Phlebotomists.Where(t => t.FirstName.ToUpper().Contains(searchValue) || t.LastName.ToUpper().Contains(searchValue) || t.EmployeeID.ToUpper().Contains(searchValue)).OrderBy(t => t.FirstName).ThenBy(t => t.LastName).Select(t => new
+            {
+                id = t.EmployeeID,
+                label =t.EmployeeID + " - " + t.FirstName + " " + t.LastName + " " + t.Telephone,
+                value =t.EmployeeID
+            }).Take(20).ToList();
+
+            return Content(JsonConvert.SerializeObject(data));
+        }
+        public IActionResult GetEmployer(string employeeID)
+        {
+            employeeID = employeeID.Trim().ToUpper();
+            var emp = _ph.Phlebotomists.FirstOrDefault(t => t.EmployeeID.ToUpper() == employeeID);
+
+            if (emp != null)
+            {
+                var data = new
+                {
+                    emp.Address1,
+                    emp.Address2,
+                    emp.City,
+                    emp.EmployeeID,
+                    emp.FirstName,
+                    emp.LastName,
+                    emp.State,
+                    emp.Telephone,
+                    emp.TerminationDate,
+                    emp.Zip
+                };
+
+                return Content(JsonConvert.SerializeObject(data));
+            }
+            return Content(JsonConvert.SerializeObject("OK"));
+        }
+        public IActionResult GetAccountsGroupJson(string type, string searchValue)
         {
             if (type == "account")
             {
@@ -669,31 +798,100 @@ namespace AccuApp32MVC.Controllers
 
             return Content(JsonConvert.SerializeObject("Error"));
         }
-        public IActionResult SaveAssignMent(string employeeID,int month,double?[] percent,int[] ids,string[] typs)
+
+        public IActionResult getaccounts(string filter)
         {
+            filter = filter.Trim().ToLower();
+            var accounts = _wdb.Accounts.Where(t => Convert.ToString(t.AccountID).Contains(filter) || t.Name.ToLower().Contains(filter))
+                             .OrderBy(t => t.Name).Take(20).Select(t => new
+                             {
+                                 id = t.AccountID.ToString(),
+                                 label = t.Name,
+                                 value = t.Name
+                             }).ToList();
+            return Content(JsonConvert.SerializeObject(accounts));
+        }
+        public IActionResult getaccount(int accountId)
+        {
+            var account = _wdb.Accounts.FirstOrDefault(t => t.AccountID == accountId);
 
-            var pa = new PhlebotomistAssignment
+            if (account != null)
             {
-                 EmployeeID=employeeID,
-                 Month=new DateTime(DateTime.Now.Year,month,1),
-                 LastModifiedBy=User.Identity.Name,
-                 LastModifiedDate=DateTime.Now
-            };
+                var data = new
+                {
+                    account.AccountID,
+                    account.Address,
+                    account.Suite,
+                    account.City,
+                    account.State,
+                    account.Zip
+                };
+                return Content(JsonConvert.SerializeObject(data));
+            }
 
-            _ph.PhlebotomistAssignments.Add(pa);
+            return Content(JsonConvert.SerializeObject("Error"));
+        }
+        public IActionResult SaveAssignment(int PhlebotomistAssignmentID,bool? confirmed, string employeeID, int month,int year,int[] palIds,double?[] percent, int[] ids, string[] typs)
+        {
+            month = month == 0 ? 1 : month;
+            year=year==0?DateTime.Now.Year: year;
+
+            var pa = _ph.PhlebotomistAssignments.FirstOrDefault(t => t.PhlebotomistAssignmentID == PhlebotomistAssignmentID);
+
+            if (pa != null)
+            {
+                pa.EmployeeID = employeeID;
+                pa.Month = new DateTime(year, month, 1);
+                pa.Confirmed = confirmed;
+                pa.LastModifiedBy = User.Identity.Name;
+                pa.LastModifiedDate = DateTime.Now;
+
+            } else
+            {
+                pa = new PhlebotomistAssignment
+                {
+                    EmployeeID = employeeID,
+                    Month = new DateTime(year, month, 1),
+                    LastModifiedBy = User.Identity.Name,
+                    LastModifiedDate = DateTime.Now,
+                    Confirmed=confirmed
+                };
+                _ph.PhlebotomistAssignments.Add(pa);
+            }
 
             _ph.SaveChanges();
 
-            for(int i = 0; i < ids.Length; i++)
+            var dbPalIds = _ph.PhlebotomistAssignmentLines.Where(t => t.PhlebotomistAssignmentID == PhlebotomistAssignmentID).Select(t => t.PhlebotomistAssignmentLineID).ToArray();
+
+            var delPalIds = dbPalIds.Except(palIds.Where(t => t != -1)).ToArray();
+
+            for(var i=0;i< palIds.Length; i++)
             {
-                _ph.PhlebotomistAssignmentLines.Add(new PhlebotomistAssignmentLine
+                var pal = _ph.PhlebotomistAssignmentLines.FirstOrDefault(t => t.PhlebotomistAssignmentLineID == palIds[i]);
+
+                if (pal != null)
                 {
-                    AccountID = typs[i] == "account" ? ids[i] : null,
-                    GroupID = typs[i] == "group" ? ids[i] : null,
-                    Percentage = percent[i].HasValue ? percent[i].Value : 0,
-                     PhlebotomistAssignmentID=pa.PhlebotomistAssignmentID
-                });
+                    pal.Percentage = percent[i]??0.0;
+                    if (typs[i] == "group")
+                        pal.GroupID = ids[i];
+                    if (typs[i] == "account")
+                        pal.AccountID = ids[i];
+                } else
+                {
+                    pal = new PhlebotomistAssignmentLine
+                    {
+                        PhlebotomistAssignmentID= pa.PhlebotomistAssignmentID,
+                        Percentage = percent[i] ?? 0.0,
+                        GroupID = typs[i] == "group" ? ids[i] : null,
+                        AccountID = typs[i] == "account" ? ids[i] : null
+                    };
+                    _ph.PhlebotomistAssignmentLines.Add(pal);
+                }
             }
+
+            var delPals = _ph.PhlebotomistAssignmentLines.Where(t => delPalIds.Contains(t.PhlebotomistAssignmentLineID)).ToList();
+
+            _ph.PhlebotomistAssignmentLines.RemoveRange(delPals);
 
             _ph.SaveChanges();
 
@@ -702,9 +900,11 @@ namespace AccuApp32MVC.Controllers
         public IActionResult GetPhlebotomyAssignment(int phlebotomistAssignmentID)
         {
             var pa = _ph.PhlebotomistAssignments.Include(x => x.Employee).FirstOrDefault(t => t.PhlebotomistAssignmentID == phlebotomistAssignmentID);
-            if (pa != null) {
+            if (pa != null)
+            {
                 var data = new
                 {
+                    PhlebotomistAssignmentID = pa.PhlebotomistAssignmentID,
                     EmployeeID = pa.EmployeeID,
                     FirstName = pa.Employee.FirstName,
                     LastName = pa.Employee.LastName,
@@ -712,9 +912,9 @@ namespace AccuApp32MVC.Controllers
                     LastModifiedBy = pa.LastModifiedBy,
                     LastModifiedDate = pa.LastModifiedDate,
                     Confirmed = pa.Confirmed,
-                    State=pa.Employee.State,
-                    Month=pa.Month.Month,
-                    Year=pa.Month.Year,
+                    State = pa.Employee.State,
+                    Month = pa.Month.Month,
+                    Year = pa.Month.Year,
                     PhlebotomyAssignmentLines = _ph.PhlebotomistAssignmentLines.Include(l => l.Account).Include(l => l.Group).Where(l => l.PhlebotomistAssignmentID == phlebotomistAssignmentID)
                     .Select(k => new
                     {
@@ -724,7 +924,7 @@ namespace AccuApp32MVC.Controllers
                         Name = k.AccountID != null ? k.Account.Name : (k.GroupID != null ? k.Group.Name : null),
                         SalesRep = k.AccountID != null ? k.Account.Group.SalesRep : (k.GroupID != null ? k.Group.SalesRep : null),
                         type = k.AccountID != null ? "account" : (k.GroupID != null ? "group" : null),
-                        Percentage=k.Percentage
+                        Percentage = k.Percentage
                     }).ToList()
                 };
                 return Content(JsonConvert.SerializeObject(data));
@@ -736,7 +936,7 @@ namespace AccuApp32MVC.Controllers
         {
             return View("AccessionList");
         }
-        public IActionResult AccessionListJson(DateTime? date1,DateTime? date2)
+        public IActionResult AccessionListJson(DateTime? date1, DateTime? date2)
         {
             //get parameters
             var draw = Convert.ToInt32(Request.Form["draw"].ToString());
@@ -767,7 +967,7 @@ namespace AccuApp32MVC.Controllers
             var GrpClaims = grpclaim.Union((from g in _wdb.Groups where repclaim.Contains(g.SalesRep) || repclaim.Contains(g.Manager) select g.GroupID.ToString()).ToList()).ToList();
             var grpclaim2 = (from c in User.Claims where c.Type == "PhlebotomyLead" select c.Value).ToList();
 
-            var GrpClaims1= _ph.Phlebotomists
+            var GrpClaims1 = _ph.Phlebotomists
                         .Join(_ph.PhlebotomistLeads, l1 => l1.EmployeeID, r1 => r1.EmployeeID, (l2, r2) => new { l2, r2 })
                         .Join(_ph.PhlebotomistAssignments, l3 => l3.l2.EmployeeID, r3 => r3.EmployeeID, (l4, r4) => new { l4, r4 })
                         .Join(_ph.PhlebotomistAssignmentLines, l5 => l5.r4.PhlebotomistAssignmentID, r5 => r5.PhlebotomistAssignmentID, (l6, r6) => new { l6, r6 })
@@ -818,7 +1018,7 @@ namespace AccuApp32MVC.Controllers
                     customAccessions = orderDirect == "asc" ? customAccessions.OrderBy(x => x.AccountID) : customAccessions.OrderByDescending(x => x.AccountID);
                     break;
                 case 2:
-                    customAccessions = orderDirect == "asc" ? customAccessions.OrderBy(x => x.PatientName) : customAccessions.OrderByDescending(x => x.PatientName); 
+                    customAccessions = orderDirect == "asc" ? customAccessions.OrderBy(x => x.PatientName) : customAccessions.OrderByDescending(x => x.PatientName);
                     break;
                 case 3:
                     customAccessions = orderDirect == "asc" ? customAccessions.OrderBy(x => x.PatientDOB) : customAccessions.OrderByDescending(x => x.PatientDOB);
@@ -849,8 +1049,8 @@ namespace AccuApp32MVC.Controllers
                 recordsFiltered = recordsFiltered,
                 data = accession.Select(t => new
                 {
-                    AccessionId=t.AccessionID,
-                    Status=t.Status,
+                    AccessionId = t.AccessionID,
+                    Status = t.Status,
                     AccountId = t.AccountID,
                     PatientName = t.PatientName,
                     PatientDOB = t.PatientDOB,
@@ -862,7 +1062,7 @@ namespace AccuApp32MVC.Controllers
                     t.Stat2,
                     t.Stat3,
                     t.Stat4,
-                    LastModifiedBy=t.ModifiedBy.Substring(0,t.ModifiedBy.Length-18),
+                    LastModifiedBy = t.ModifiedBy.Substring(0, t.ModifiedBy.Length - 18),
                     CreatedBy = t.CreatedBy.Substring(0, t.CreatedBy.Length - 18)
                 }).ToList()
             };
@@ -875,18 +1075,18 @@ namespace AccuApp32MVC.Controllers
 
             var data = new
             {
-                AccessionId= accession.AccessionID,
-                AccountId= accession.AccountID,
-                InsuranceId= accession.InsuranceID,
-                InsuranceName= accession.InsuranceName,
-                Note= accession.Note,
-                PatientDOB= accession.PatientDOB,
-                PatientName= accession.PatientName,
-                PatientGender= accession.PatientGender
+                AccessionId = accession.AccessionID,
+                AccountId = accession.AccountID,
+                InsuranceId = accession.InsuranceID,
+                InsuranceName = accession.InsuranceName,
+                Note = accession.Note,
+                PatientDOB = accession.PatientDOB,
+                PatientName = accession.PatientName,
+                PatientGender = accession.PatientGender
             };
             return Content(JsonConvert.SerializeObject(data));
         }
-        public IActionResult SaveAcession(int? accessionId,int? accountId,string patientName,DateTime? patientDOB,string insuranceName,string insuranceId,string note,bool? stat1,bool? stat2,bool? stat3,bool? stat4)
+        public IActionResult SaveAcession(int? accessionId, int? accountId, string patientName, DateTime? patientDOB, string insuranceName, string insuranceId, string note, bool? stat1, bool? stat2, bool? stat3, bool? stat4)
         {
             var accession = _wdb.Accessions.FirstOrDefault(t => t.AccessionID == accessionId);
             if (accession != null)
@@ -896,7 +1096,7 @@ namespace AccuApp32MVC.Controllers
                 accession.PatientDOB = patientDOB;
                 accession.InsuranceName = insuranceName;
                 accession.InsuranceID = insuranceId;
-                accession.Note = note??string.Empty;
+                accession.Note = note ?? string.Empty;
                 accession.Stat1 = stat1.Value;
                 accession.Stat2 = stat2.Value;
                 accession.Stat3 = stat3.Value;
@@ -906,20 +1106,20 @@ namespace AccuApp32MVC.Controllers
             {
                 accession = new Accession
                 {
-                     PatientDOB=patientDOB,
-                     ModifiedBy=User.Identity.Name,
-                     LastModified=DateTime.Now,
-                     AccountID=accountId.Value,
-                     Created=DateTime.Now,
-                     CreatedBy=User.Identity.Name,
-                     InsuranceID=insuranceId,
-                     InsuranceName=insuranceName,
-                     Note=note??string.Empty,
-                     PatientName=patientName,
-                     Stat1 = stat1.Value,
-                     Stat2 = stat2.Value,
-                     Stat3 = stat3.Value,
-                     Stat4 = stat4.Value
+                    PatientDOB = patientDOB,
+                    ModifiedBy = User.Identity.Name,
+                    LastModified = DateTime.Now,
+                    AccountID = accountId.Value,
+                    Created = DateTime.Now,
+                    CreatedBy = User.Identity.Name,
+                    InsuranceID = insuranceId,
+                    InsuranceName = insuranceName,
+                    Note = note ?? string.Empty,
+                    PatientName = patientName,
+                    Stat1 = stat1.Value,
+                    Stat2 = stat2.Value,
+                    Stat3 = stat3.Value,
+                    Stat4 = stat4.Value
                 };
                 _wdb.Accessions.Add(accession);
             }
@@ -966,11 +1166,11 @@ namespace AccuApp32MVC.Controllers
 
 
 
-            IQueryable<Account> accounts = _ph.Accounts;
+            IEnumerable<Account> accounts = _ph.Accounts;
 
             if (Status.HasValue) //Active
             {
-                accounts = accounts.Where(t => t.Active == Status.Value);
+                accounts = accounts.Where(t => t.Active == Status.Value).AsEnumerable();
             }
 
             var recordsTotal = accounts.Count();
@@ -978,14 +1178,14 @@ namespace AccuApp32MVC.Controllers
 
             if (!string.IsNullOrEmpty(Search))
             {
-                accounts = accounts.Where(t => Convert.ToString(t.AccountID) == Search && t.Name.Contains(Search) || t.Address.Contains(Search));
+                accounts = accounts.Where(t => Convert.ToString(t.AccountID).Contains(Search) && (t.Name??"").Contains(Search) || (t.Address??"").Contains(Search)).AsEnumerable();
 
-                var acc2 = from a in accounts
+                var acc2 = (from a in accounts
                            join l in _ph.PhlebotomistAssignmentLines on a.AccountID equals l.AccountID
                            join p in _ph.PhlebotomistAssignments on l.PhlebotomistAssignmentID equals p.PhlebotomistAssignmentID
                            join e in _ph.Phlebotomists on p.EmployeeID equals e.EmployeeID
-                           where (e.FirstName + " " + e.LastName).Contains(Search) && p.Month == new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1)
-                           select a;
+                           where ((e.FirstName??"") + " " + (e.LastName??"")).Contains(Search) && p.Month == new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1)
+                           select a).AsEnumerable();
 
                 accounts = accounts.Union(acc2);
             }
@@ -995,7 +1195,7 @@ namespace AccuApp32MVC.Controllers
             switch (orderColumn)
             {
                 case 0:
-                    accounts = orderDirect=="asc"?accounts.OrderBy(x => x.AccountID): accounts.OrderByDescending(x => x.AccountID);
+                    accounts = orderDirect == "asc" ? accounts.OrderBy(x => x.AccountID) : accounts.OrderByDescending(x => x.AccountID);
                     break;
                 case 1:
                     accounts = orderDirect == "asc" ? accounts.OrderBy(x => x.Name) : accounts.OrderByDescending(x => x.Name);
@@ -1030,14 +1230,14 @@ namespace AccuApp32MVC.Controllers
                 recordsFiltered = recordsFiltered,
                 data = accountsData.Select(t => new
                 {
-                    AccountId=t.AccountID,
-                    Active=t.Active, 
-                    Address=t.Address,
-                    City=t.City,
-                    Telephone=t.Telephone,
-                    Fax=t.Fax,
-                    Name=t.Name,
-                    State=t.State
+                    AccountId = t.AccountID,
+                    Active = t.Active,
+                    Address = t.Address,
+                    City = t.City,
+                    Telephone = t.Telephone,
+                    Fax = t.Fax,
+                    Name = t.Name,
+                    State = t.State
                 }).ToList()
             };
             return Content(JsonConvert.SerializeObject(data));

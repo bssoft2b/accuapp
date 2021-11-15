@@ -125,7 +125,8 @@ $(function () {
 
         frmFormControlsEnable();
 
-        $("#txtEmployeeSearch").val(data.EmployeeID);
+        $("#txtPhlebotomistAssignmentID").val(data.PhlebotomistAssignmentID);
+        $("#txtEmployeeID").val(data.EmployeeID);
         $("#txtFirstName").val(data.FirstName);
         $("#txtLastName").val(data.LastName);
         $("#txtState").val(data.State);
@@ -141,14 +142,15 @@ $(function () {
 
         for (let i = 0; i < data.PhlebotomyAssignmentLines.length; i++) {
             let row = data.PhlebotomyAssignmentLines[i];
-            $("#tblDistribution tbody").append("<tr type='" + row.type + "'><td><input type='text' class='form-control percent' value='" + row.Percentage + "' /></td><td><input type='search' class='btn btn-light border search' placeholder='search string/press Enter' value='" + row.ID + "'><select class='form-control' style='display:none;'></select></td><td><label class='name' >" + row.Name + "</label></td><td><label class='salesrep'>" + row.SalesRep + "</label></td><td><button type='button' class='btn btn-danger remove'>Remove</button></td></tr>");
+            $("#tblDistribution tbody").append("<tr type='" + row.type + "' id='" + row.PhlebotomistAssignmentLineID +"'><td><input type='text' class='form-control percent' value='" + row.Percentage + "' /></td><td><input type='search' class='btn btn-light border search' placeholder='search string/press Enter' value='" + row.ID + "'><select class='form-control' style='display:none;'></select></td><td><label class='name' >" + row.Name + "</label></td><td><label class='salesrep'>" + row.SalesRep + "</label></td><td><button type='button' class='btn btn-danger remove'>Remove</button></td></tr>");
             BindEventDetailRow(row.type);
         }
     }
     //filling details form
     function FillDetailsForm(data) {
 
-        $("#txtEmployeeSearch").val(data.EmployeeID);
+        $("#txtPhlebotomistAssignmentID").val(data.PhlebotomistAssignmentID);
+        $("#txtEmployeeID").val(data.EmployeeID);
         $("#txtFirstName").val(data.FirstName);
         $("#txtLastName").val(data.LastName);
         $("#txtState").val(data.State);
@@ -163,19 +165,22 @@ $(function () {
 
         for (let i = 0; i < data.PhlebotomyAssignmentLines.length; i++) {
             let row = data.PhlebotomyAssignmentLines[i];
-            $("#tblDistribution tbody").append("<tr type='" + row.type + "'><td><input type='text' class='form-control percent' value='" + row.Percentage + "' /></td><td><input type='search' class='btn btn-light border search' placeholder='search string/press Enter' value='" + row.ID + "'><select class='form-control' style='display:none;'></select></td><td><label class='name' >" + row.Name + "</label></td><td><label class='salesrep'>" + row.SalesRep + "</label></td><td><button type='button' class='btn btn-danger remove'>Remove</button></td></tr>");
+            $("#tblDistribution tbody").append("<tr type='" + row.type + "' id='" + row.PhlebotomistAssignmentLineID+"'><td><input type='text' class='form-control percent' value='" + row.Percentage + "' /></td><td><input type='search' class='btn btn-light border search' placeholder='search string/press Enter' value='" + row.ID + "'><select class='form-control' style='display:none;'></select></td><td><label class='name' >" + row.Name + "</label></td><td><label class='salesrep'>" + row.SalesRep + "</label></td><td><button type='button' class='btn btn-danger remove'>Remove</button></td></tr>");
         }
 
         frmFormControlsDisable();
     }
 
     function frmFormControlsDisable() {
-        $("#txtEmployeeSearch").prop("disabled", true);
+
+        $("#txtEmployeeID").prop("disabled", true);
         $("#chkConfirmed").prop("disabled",true);
         $("#selectMonth").prop("disabled",true);
         $("#selectYear").prop("disabled", true);
+
         $("#btnAddAccountDistribution").prop("disabled", true)
         $("#btnAddGroupDistribution").prop("disabled", true)
+
         $("#btnCreateOk").prop("disabled", true)
 
 
@@ -185,12 +190,15 @@ $(function () {
     }
 
     function frmFormControlsEnable() {
-        $("#txtEmployeeSearch").prop("disabled", false);
+
+        $("#txtEmployeeID").prop("disabled", false);
         $("#chkConfirmed").prop("disabled", false);
         $("#selectMonth").prop("disabled", false);
         $("#selectYear").prop("disabled", false);
+
         $("#btnAddAccountDistribution").prop("disabled", false)
         $("#btnAddGroupDistribution").prop("disabled", false)
+
         $("#btnCreateOk").prop("disabled", false)
 
 
@@ -221,54 +229,49 @@ $(function () {
    
     //modal form event
     //binding event 
-    $("#txtEmployeeSearch").keypress(function (event) {
-        if (event.keyCode != "13")
-            return;
-        if ($("#txtEmployeeSearch").val() == "")
-            return;
-
-        $.ajax({
-            method: "POST",
-            url: "/Phlebotomy/GetEmployeeListJson",
-            dataType: "JSON",
-            data: { searchValue: $("#txtEmployeeSearch").val() },
-            success: function (data) {
-
-                responseEmployeeData = data;
-                $("#selectEmployeeID option").remove();
-                $("#selectEmployeeID").append("<option value=''>--</option>");
-                for (let i = 0; i < data.length; i++) {
-                    $("#selectEmployeeID").append("<option value='" + data[i].EmployeeID + "'>" + data[i].EmployeeID + " " + data[i].FirstName + " " + data[i].LastName + "</option>");
+    $("#txtEmployeeID").autocomplete({
+        source: function (request, response) {
+            $.ajax({
+                url: "/Phlebotomy/GetEmployeeList",
+                dataType: "json",
+                method: "POST",
+                data: {
+                    filter: request.term
+                },
+                success: function (data) {
+                    response(data);
                 }
-                if (data.length > 0)
-                    $("#selectEmployeeID").show();
-            }
-        })
-    });
-    //dropdown select
-    $("#selectEmployeeID").change(function () {
-        var employeeid = $(this).find("option:selected").val();
-        let selectedItem = responseEmployeeData.find(function (item) {
-            return item.EmployeeID == employeeid;
-        });
+            });
+        }, minLength: 2,
+        select: function (event, ui) {
+            $.ajax({
+                url: "/Phlebotomy/GetEmployer",
+                dataType: "json",
+                method: "POST",
+                data: {
+                    employeeID: ui.item.id
+                },
+                success: function (data) {
 
-        $("#txtEmployeeSearch").val(selectedItem.EmployeeID);
-        $("#txtFirstName").val(selectedItem.FirstName);
-        $("#txtLastName").val(selectedItem.LastName);
-        $("#txtState").val(selectedItem.State);
-        $("#txtTelephone").val(selectedItem.Telephone);
-
-        $(this).hide();
+                    $("#txtEmployeeSearch").val(data.EmployeeID);
+                    $("#txtFirstName").val(data.FirstName);
+                    $("#txtLastName").val(data.LastName);
+                    $("#txtState").val(data.State);
+                    $("#txtTelephone").val(data.Telephone);
+                }
+            });
+        }
     });
+
     //button Account Distribution
     $("#btnAddAccountDistribution").click(function () {
-        $("#tblDistribution tbody").append("<tr type='account'><td><input type='text' class='form-control percent' /></td><td><input type='search' class='btn btn-light border search' placeholder='search string/press Enter'><select class='form-control' style='display:none;'></select></td><td><label class='name' ></label></td><td><label class='salesrep'></label></td><td><button type='button' class='btn btn-danger remove'>Remove</button></td></tr>");
+        $("#tblDistribution tbody").append("<tr type='account' id='-1'><td><input type='text' class='form-control percent' /></td><td><input type='search' class='btn btn-light border search' placeholder='search string/press Enter'><select class='form-control' style='display:none;'></select></td><td><label class='name' ></label></td><td><label class='salesrep'></label></td><td><button type='button' class='btn btn-danger remove'>Remove</button></td></tr>");
         BindEventDetailRow("account");
     });
 
     //button Group distribution
     $("#btnAddGroupDistribution").click(function () {
-        $("#tblDistribution tbody").append("<tr type='group'><td><input type='text' class='form-control percent' /></td><td><input type='search' class='btn btn-light border search' placeholder='search string/press Enter'><select class='form-control' style='display:none;'></select></td><td><label class='name' ></label></td><td><label class='salesrep'></label></td><td><button type='button' class='btn btn-danger remove'>Remove</button></td></tr>");
+        $("#tblDistribution tbody").append("<tr type='group' id='-1'><td><input type='text' class='form-control percent' /></td><td><input type='search' class='btn btn-light border search' placeholder='search string/press Enter'><select class='form-control' style='display:none;'></select></td><td><label class='name' ></label></td><td><label class='salesrep'></label></td><td><button type='button' class='btn btn-danger remove'>Remove</button></td></tr>");
         BindEventDetailRow("group");
     });
     //bind event to detail row 
@@ -323,8 +326,11 @@ $(function () {
 
         //preparing date
 
-        let employeeID = $("#txtEmployeeSearch").val();
+        let PhlebotomistAssignmentID = $("#txtPhlebotomistAssignmentID").val();
+        let employeeID = $("#txtEmployeeID").val();
         let month = $("#selectMonth").val();
+        let year = $("#selectYear").val();
+        let confirmed = $("#chkConfirmed").prop("checked");
 
         let percent = $("#tblDistribution input.percent").map(function () {
             return $(this).val();
@@ -334,8 +340,12 @@ $(function () {
             return $(this).val();
         }).get();
 
-        let typs= $("#tblDistribution tbody tr").map(function () {
+        let typs = $("#tblDistribution tbody tr").map(function () {
             return $(this).attr("type");
+        }).get();
+
+        let palIDs = $("#tblDistribution tbody tr").map(function () {
+            return $(this).attr("id");
         }).get();
 
 
@@ -343,12 +353,23 @@ $(function () {
             url: "/Phlebotomy/SaveAssignment",
             method: "POST",
             dataType: "JSON",
-            data: { employeeID: employeeID,month:month,percent:percent,ids:IDs,typs:typs},
+            data: {
+                PhlebotomistAssignmentID: PhlebotomistAssignmentID,
+                employeeID: employeeID,
+                month: month,
+                year:year,
+                percent: percent,
+                ids: IDs,
+                typs: typs,
+                palIDs: palIDs,
+                confirmed: confirmed
+            },
             success: function (data) {
                 if (data == "OK") {
                     $("#frmAssignmentManager").modal("hide");
                     frmCreateFormClear();
                 }
+                phlebotomistAssigmnemtList.ajax.reload();
             }
         });
     });

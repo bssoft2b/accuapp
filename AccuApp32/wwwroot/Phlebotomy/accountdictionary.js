@@ -20,6 +20,7 @@ $(function () {
                 d.Status = $("#filter").val()
             }
         },
+        order:[[1,"asc"]],
         columns: [
             { data: "AccountId"},
             { data: "Name" },

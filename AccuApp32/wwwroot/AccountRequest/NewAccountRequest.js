@@ -31,9 +31,9 @@ $(function () {
 
     $("#lstNeedPgxPortal").change(function () {
         if ($(this).val() == "true") {
-            $("#txtPhysicianEmail").parent().css("display", "block");
+            $("#txtPhysicianEmail").parent().parent().css("display", "block");
         } else {
-            $("#txtPhysicianEmail").parent().css("display", "none");
+            $("#txtPhysicianEmail").parent().parent().css("display", "none");
         }
     });
 
@@ -98,19 +98,22 @@ $(function () {
             let accountRequestID = $(event.target).closest("tr").attr("id");
             $("#frmAccountRequestModalLabel").text("Edit");
             fillEditForm(accountRequestID);
+            FormControlsEnable();
         });
         $("#tblAccountRequests button.btn-details").click(function (event) {
             let accountRequestID = $(event.target).closest("tr").attr("id");
             $("#frmAccountRequestModalLabel").text("Details");
-            fillDetailsForm(accountRequestID);
+            fillEditForm(accountRequestID);
+            FormControlsDisable();
         });
     });
 
     //binding event to button Create new
     $("#btnCreateNew").click(function () {
-        FormControlsEnable();
         FormClear();
+        FormControlsEnable();
         $("#frmAccountRequestModalLabel").text("Create");
+        $("#lstStatus").prop("disabled", "true");
         $("#frmAccountRequest").modal("show");
     });
 
@@ -132,24 +135,8 @@ $(function () {
 
     }
 
-    function fillDetailsForm(AccountRequestID) {
-        $.ajax({
-            method: "POST",
-            url: "/AccountRequest/GetAccountRequest",
-            dataType: "JSON",
-            data: { AccountRequestID: AccountRequestID },
-            success: function (data) {
-                FillDetailsForm(data);
-                $("#frmAccountRequest").modal("show");
-            }
-        });
-    }
-
     //filling edit form
     function FillForm(data) {
-
-        FormControlsEnable();
-
 
         let multiValue = [];
 
@@ -192,6 +179,11 @@ $(function () {
         $("#chkSuppliesNeeded").prop("checked",data.SuppliesNeeded);
         $("#lstNeedPgxPortal").val(data.NeedPgxPortal.toString());
         $("#txtPhysicianEmail").val(data.PhysicianEmail);
+        if (data.NeedPgxPortal.toString() == "true") {
+            $("#txtPhysicianEmail").parent().parent().css("display", "block");
+        } else {
+            $("#txtPhysicianEmail").parent().parent().css("display", "none");
+        }
 
     }
  
@@ -209,6 +201,12 @@ $(function () {
             $(item).prop("disabled", true);
         });
 
+        $.each($("#frmAccountRequest button"), function (index, item) {
+            $(item).prop("disabled", true);
+        });
+
+        $("button.close").prop("disabled", false);
+        $("button.btn-close").prop("disabled", false);
     }
 
     function FormControlsEnable() {

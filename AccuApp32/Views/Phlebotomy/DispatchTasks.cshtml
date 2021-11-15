@@ -8,6 +8,9 @@
         background-color: blue;
         color: white;
     }
+    .ui-datepicker {
+      z-index: 1600 !important; /* has to be larger than 1050 */
+    }
 </style>
 <!--edit form-->
 <div class="modal fade" id="editDispatchTask" tabindex="-1" role="dialog" aria-labelledby="editDispatchTaskModalLabel" aria-hidden="true">
@@ -19,168 +22,91 @@
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-            <div class="modal-body">
-                <form>
+            <div class="modal-body ui-front">
+                <form id="frmDispatchTask">
                     <div class="form-group row">
                         <div class="col-sm-4">
                             <label for="txtAccountID" class="col-form-label">AccountID:</label>
-                            <input type="text" class="form-control" id="txtAccountID" readonly>
+                            <input type="text" class="form-control" id="txtAccountID" name="txtAccountID" autocomplete="off">
                             <input type="hidden" class="form-control" id="txtDispatchTaskID">
                         </div>
                         <div class="col-sm-4">
                             <label for="txtAddressLine1" class="col-form-label">Address line 1:</label>
-                            <input type="text" class="form-control" id="txtAddressLine1" readonly>
+                            <input type="text" class="form-control" id="txtAddressLine1" name="txtAddressLine1" >
                         </div>
                         <div class="col-sm-4">
                             <label for="txtAddressLine2" class="col-form-label">Address line 2:</label>
-                            <input type="text" class="form-control" id="txtAddressLine2" readonly>
+                            <input type="text" class="form-control" id="txtAddressLine2" name="txtAddressLine2" >
                         </div>
                     </div>
                     <div class="form-group row">
                         <div class="col-sm-4">
                             <label for="txtCity" class="col-form-label">City:</label>
-                            <input type="text" class="form-control" id="txtCity" required>
+                            <input type="text" class="form-control" id="txtCity" name="txtCity" >
                         </div>
                         <div class="col-sm-4">
                             <label for="txtState" class="col-form-label">State:</label>
-                            <input type="text" class="form-control" id="txtState">
+                            <input type="text" class="form-control" id="txtState" name="txtState">
                         </div>
                         <div class="col-sm-4">
                             <label for="txtZip" class="col-form-label">Zip:</label>
-                            <input type="text" class="form-control" id="txtZip" required>
+                            <input type="text" class="form-control" id="txtZip" name="txtZip" >
                         </div>
                     </div>
                     <div class="form-group row">
                         <div class="col-sm-4">
                             <label for="lstCallReason" class="col-form-label">Call reason:</label>
-                            <select type="text" class="form-control" id="lstCallReason">
+                            <select type="text" class="form-control" id="lstCallReason" name="lstCallReason" >
                                 <option value="1">Pick Up</option>
                             </select>
                         </div>
                         <div class="col-sm-4">
                             <label for="txtDriver" class="col-form-label">Driver:</label>
-                            <input type="text" class="form-control" id="txtDriver" required>
+                            <input type="text" class="form-control" id="txtDriver" name="txtDriver" >
                         </div>
                         <div class="col-sm-4">
                             <label for="txtPickupTime" class="col-form-label">Pickup time:</label>
-                            <input type="text" class="form-control" id="txtPickupTime" required>
+                            <input type="text" class="form-control" id="txtPickupTime" name="txtPickupTime">
                         </div>
                     </div>
                     <div class="form-group row">
                         <div class="col-sm-4">
                             <label for="chkStat" class="col-form-label">Stat:</label>
-                            <input type="checkbox" class="form-control" id="chkStat" required>
+                            <input type="checkbox" id="chkStat" name="chkStat" >
                         </div>
                         <div class="col-sm-4">
                             <label for="lstDispatchStatusID" class="col-form-label">Dispatch status:</label>
-                            <select type="text" class="form-control" id="lstDispatchStatusID"></select>
+                            <select type="text" class="form-control" id="lstDispatchStatusID" name="lstDispatchStatusID">
+                                <option value="1" selected>1 - New</option>
+                                <option value="2">2 - Assigned</option>
+                            </select>
                         </div>
                     </div>
                     <div class="form-group row">
                         <div class="col-sm-4 border">
                             <label for="lstDispatchContactEmail" class="col-form-label" >Dispatch contact email:</label>
-                            <ul type="text" class="form-control" id="lstDispatchContactEmail" style="list-style-type: none;height:auto!important;"></ul>
+                            <ul type="text" class="form-control" id="lstDispatchContactEmail" name="lstDispatchContactEmail" style="list-style-type: none;height:auto!important;"></ul>
                             <button type="button" id="btnAddDispatchContactEmail" class="btn btn-secondary">Add</button>
                              <button type="button" id="btnRemoveDispatchContactEmail" class="btn btn-secondary">Remove</button>
                         </div>
                         <div class="col-sm-8">
                             <label for="txtNotes" class="col-form-label">Notes:</label>
-                            <textarea type="text" class="form-control" id="txtNotes" style="height:250px"></textarea>
+                            <textarea type="text" class="form-control" id="txtNotes" name="txtNotes" style="height:250px"></textarea>
                         </div>
                     </div>
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-secondary btn-close" data-dismiss="modal">Close</button>
                 <button type="button" id="btnOk" class="btn btn-primary">Save</button>
             </div>
         </div>
     </div>
 </div>
 <!--END edit form-->
-<!--details form-->
-<div class="modal fade" id="detailsDispatchTask" tabindex="-1" role="dialog" aria-labelledby="detailsDispatchTaskModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="detailDispatchTaskModalLabel">Details</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <form>
-                    <div class="form-group row">
-                        <div class="col-sm-4">
-                            <label for="lblAccountID" class="col-form-label">AccountID:</label>
-                            <input type="text" class="form-control" id="lblAccountID" readonly>
-                        </div>
-                        <div class="col-sm-4">
-                            <label for="lblAddressLine1" class="col-form-label">Address line 1:</label>
-                            <input type="text" class="form-control" id="lblAddressLine1" readonly>
-                        </div>
-                        <div class="col-sm-4">
-                            <label for="lblAddressLine2" class="col-form-label">Address line 2:</label>
-                            <input type="text" class="form-control" id="lblAddressLine2" readonly>
-                        </div>
-                    </div>
-                    <div class="form-group row">
-                        <div class="col-sm-4">
-                            <label for="lblCity" class="col-form-label">City:</label>
-                            <input type="text" class="form-control" id="lblCity" readonly>
-                        </div>
-                        <div class="col-sm-4">
-                            <label for="lblState" class="col-form-label">State:</label>
-                            <input type="text" class="form-control" id="lblState" readonly>
-                        </div>
-                        <div class="col-sm-4">
-                            <label for="lblZip" class="col-form-label">Zip:</label>
-                            <input type="text" class="form-control" id="lblZip" readonly>
-                        </div>
-                    </div>
-                    <div class="form-group row">
-@*                        <div class="col-sm-4">
-                            <label for="lblCallReason" class="col-form-label">Call reason:</label>
-                            <input type="text" class="form-control" id="lblCallReason" readonly/>
-                        </div>
-*@                        <div class="col-sm-6">
-                            <label for="lblDriver" class="col-form-label">Driver:</label>
-                            <input type="text" class="form-control" id="lblDriver" readonly>
-                        </div>
-                        <div class="col-sm-6">
-                            <label for="lblPickupTime" class="col-form-label">Pickup time:</label>
-                            <input type="text" class="form-control" id="lblPickupTime" readonly>
-                        </div>
-                    </div>
-                    <div class="form-group row">
-                        <div class="col-sm-4">
-                            <label for="lblStat" class="col-form-label">Stat:</label>
-                            <input type="checkbox" class="form-control" id="lblStat" disabled>
-                        </div>
-                        <div class="col-sm-4">
-                            <label for="lblDispatchStatusID" class="col-form-label">Dispatch status:</label>
-                            <input type="text" class="form-control" id="lblDispatchStatusID" readonly/>
-                        </div>
-                    </div>
-                    <div class="form-group row">
-                        <div class="col-sm-4 border">
-                            <label for="lblDispatchContactEmail" class="col-form-label" >Dispatch contact email:</label>
-                            <ul type="text" class="form-control" id="lblDispatchContactEmail" style="list-style-type: none;height:auto!important;"></ul>
-                        </div>
-                        <div class="col-sm-8">
-                            <label for="lblNotes" class="col-form-label">Notes:</label>
-                            <textarea type="text" class="form-control" id="lblNotes" style="height:250px" readonly></textarea>
-                        </div>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-            </div>
-        </div>
-    </div>
-</div>
-<!--END details form-->
+<br/>
+<button id="btnCreate" class="btn btn-secondary">Create new</button>
+<br/>
 <br/>
 <!--Dispatch tasks-->
 <select id="selectDispatchStatus" class="form-control col-sm-2">

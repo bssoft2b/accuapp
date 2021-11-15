@@ -5,17 +5,136 @@ var responseEmployeeData;
 $(function () {
 
 
-    $("#lstRequestStatus").chosen();
+    $("#lstStatusFilter").chosen();
 
-    $("#lstRequestStatus").change(function () {
+    $("#lstStatusFilter").change(function () {
         supplyOrdersList.ajax.reload();
     });
 
-    $("#lstHasCustomPanels").change(function () {
-        if ($(this).val() == "true") {
-            $("#txtCustomPanels").parent().css("display", "block");
+
+    var addressesObj;
+    $("#lstAccountID").change(function (event) {
+
+        $("#txtDeliveryAddressName").val("");
+        $("#txtAddress").val("");
+        $("#txtCity").val("");
+        $("#txtSuite").val("");
+        $("#txtState").val("");
+        $("#txtZip").val("");
+
+
+        let accountID = $(event.target).val();
+
+        $.ajax({
+            url: "/Order/GetAdressesJson",
+            method: "POST",
+            dataType: "JSON",
+            data: {
+                AccountID: accountID
+            },
+            success: function (data) {
+
+                $("#lstDeliveryAddressID").empty();
+                $("#lstDeliveryAddressID").append("<option value=''> - select address - </option>");
+                $("#lstDeliveryAddressID").append("<option value='-1'>New Adress</option>");
+
+                for (let i = 0; i < data.length; i++) {
+                    $("#lstDeliveryAddressID").append("<option value='" + data[i].DeliveryAddressID + "'>" + data[i].DeliveryAddressName + "</option>");
+                }
+            }
+        });
+    });
+
+    $("#lstDeliveryAddressID").change(function (event) {
+
+        $("#txtDeliveryAddressName").val("");
+        $("#txtAddress").val("");
+        $("#txtCity").val("");
+        $("#txtSuite").val("");
+        $("#txtState").val("");
+        $("#txtZip").val("");
+
+        let deliveryAddressID = $("#lstDeliveryAddressID").val();
+
+        if (deliveryAddressID == "-1") {
+
+            $("#txtDeliveryAddressName").prop("readonly",false);
+            $("#txtAddress").prop("readonly", false);
+            $("#txtCity").prop("readonly", false);
+            $("#txtSuite").prop("readonly", false);
+            $("#txtState").prop("readonly", false);
+            $("#txtZip").prop("readonly", false);
+
         } else {
-            $("#txtCustomPanels").parent().css("display", "none");
+
+            $("#txtDeliveryAddressName").prop("readonly", true);
+            $("#txtAddress").prop("readonly", true);
+            $("#txtCity").prop("readonly", true);
+            $("#txtSuite").prop("readonly", true);
+            $("#txtState").prop("readonly", true);
+            $("#txtZip").prop("readonly", true);
+
+        }
+
+        $.ajax({
+            url: "/Order/GetAdressJson",
+            method: "POST",
+            dataType: "JSON",
+            data: {
+                deliveryAddressID: deliveryAddressID
+            },
+            success: function (data) {
+                $("#txtDeliveryAddressName").val(data.DeliveryAddressName);
+                $("#txtAddress").val(data.Address);
+                $("#txtCity").val(data.City);
+                $("#txtSuite").val(data.Suite);
+                $("#txtState").val(data.State);
+                $("#txtZip").val(data.Zip);
+            }
+        });
+
+    });
+
+    $("#txtDateShipped").datetimepicker();
+
+    $("#frmSupplyOrders").on("hidden.bs.modal", function () {
+        FormClear();
+        FormControlsEnable();
+    });
+
+    $("#txtItemID").autocomplete({
+        source: function (request, response) {
+            $.ajax({
+                url: "/Order/LoadItems",
+                dataType: "json",
+                method: "POST",
+                data: {
+                    filter: request.term
+                },
+                success: function (data) {
+                    response(data);
+                }
+            });
+        }, minLength: 2,
+        select: function (event, ui) {
+            $.ajax({
+                url: "/Order/getitem",
+                dataType: "json",
+                method: "POST",
+                data: {
+
+                    itemid: ui.item.id
+                },
+                success: function (data) {
+                    if (data == null)
+                        return false;
+                    $("#Items").append("<tr  salesorderlineid='-1' itemid='" + data.itemID + "'><td>" + data.itemName + "</td><td><input class='form-control ordered-qty' value='' /></td><td><input value='" + data.itemCost + "' class='form-control unit-cost'/></td><td>" + data.itemDescription + "</td><td><input value='' class='form-control committed-qty'/></td><td><input value='' class='form-control cancelled-qty'/><td><input value='' class='form-control backordered-qty'/></td><td><button class='btn btn-danger item-del'>X</button></td><tr>")
+                    $("#txtItemID").val("");
+                    $("button.item-del").unbind("click").on("click", function (event) {
+                        $(event.target).closest("tr").remove();
+                    });
+                }
+            });
         }
     });
 
@@ -63,17 +182,32 @@ $(function () {
             {
                 data: null,
                 sortable: false,
-                defaultContent: "<button class='btn btn-secondary btn-delete'>Delete</button>"
+                render: function (data, type, row, meta) {
+                    if (data.SalesOrderStatusID != 3)
+                        return "<button class='btn btn-secondary btn-delete'>Delete</button>";
+                    else
+                        return "<button class='btn btn-secondary btn-delete' disabled> Delete</button>";
+                }
             },
             {
                 data: null,
                 sortable: false,
-                defaultContent: "<button class='btn btn-secondary btn-print'>Print This</button>"
+                render: function (data, type, row, meta) {
+                    if (data.SalesOrderStatusID != 3)
+                        return "<button class='btn btn-secondary btn-print'>Print This</button>";
+                    else
+                        return "<button class='btn btn-secondary btn-print'  disabled>Print This</button>";
+                }
             },
             {
                 data: null,
                 sortable: false,
-                defaultContent: "<button class='btn btn-secondary btn-approve'>Approve</button>"
+                render: function (data, type, row, meta) {
+                    if (data.SalesOrderStatusID != 3)
+                        return "<button class='btn btn-secondary btn-approve'>Approve</button>";
+                    else
+                        return "<button class='btn btn-secondary btn-approve' disabled>Approve</button>";
+                }
             }
         ]
     });
@@ -88,17 +222,26 @@ $(function () {
         $("#tblSupplyOrders button.btn-details").click(function (event) {
             let SalesOrderID = $(event.target).closest("tr").attr("id");
             $("#frmSupplyOrdersDetailsModalLabel").text("Details");
-            fillDetailsForm(SalesOrderID);
+
+            fillEditForm(SalesOrderID);
+
+            setTimeout(function () {
+                FormControlsDisable();
+            }, 500);
+            
+        });
+        $("#tblSupplyOrders button.btn-delete").click(function (event) {
+            let SalesOrderID = $(event.target).closest("tr").attr("id");
+            if(confirm("Confirm delete?"))
+                DeleteOrder(SalesOrderID);
         });
         $("#tblSupplyOrders button.btn-print").click(function (event) {
             let SalesOrderID = $(event.target).closest("tr").attr("id");
-            $("#frmEMRRequestModalLabel").text("Details");
-            fillDetailsForm(SalesOrderID);
+            PrintForm(SalesOrderID);
         });
         $("#tblSupplyOrders button.btn-approve").click(function (event) {
             let SalesOrderID = $(event.target).closest("tr").attr("id");
-            $("#frmEMRRequestModalLabel").text("Details");
-            fillDetailsForm(SalesOrderID);
+            ApproveOrder(SalesOrderID);
         });
     });
 
@@ -107,110 +250,131 @@ $(function () {
         FormControlsEnable();
         FormClear();
 
-        $("#lstStatus").val(7);
-        $("#lstStatus").prop("disabled", "true");
+        $("#frmSupplyOrdersModalLabel").text("Create");
+        $("#frmSupplyOrders").modal("show");
 
-        $("#frmEMRRequestModalLabel").text("Create");
-        $("#frmEMRRequest").modal("show");
+        $("#lstOrderStatusID").val(1);
+        $("#lstOrderStatusID").prop("disabled", true);
+
     });
 
     //filling edit form
-    function fillEditForm(EMRRequestID) {
-
-        FormClear();
+    function fillEditForm(salesOrderID) {
 
         $.ajax({
             method: "POST",
-            url: "/EMRRequest/GetEMRRequest",
+            url: "/Order/GetSupplyOrder",
             dataType: "JSON",
-            data: { EMRRequestID: EMRRequestID },
+            data: { salesOrderID: salesOrderID },
             success: function (data) {
+
                 FillForm(data);
-                $("#frmEMRRequest").modal("show");
+
+                $("#frmSupplyOrders").modal("show");
             }
         });
 
     }
-
-    function fillDetailsForm(EMRRequestID) {
+    function DeleteOrder(salesOrderID) {
 
         $.ajax({
             method: "POST",
-            url: "/EMRRequest/GetEMRRequest",
+            url: "/Order/DeleteSupplyOrder",
             dataType: "JSON",
-            data: { EMRRequestID: EMRRequestID },
+            data: { salesOrderID: salesOrderID },
             success: function (data) {
-                FillForm(data);
-                FormControlsDisable();
-                $("#frmEMRRequest").modal("show");
+                supplyOrdersList.ajax.reload();
             }
         });
+
     }
 
     //filling edit form
     function FillForm(data) {
 
-        FormControlsEnable();
 
-        $("#lstStatus").val(data.Status);
-        $("#lstAccountID").val(data.AccountID);
-        $("#txtEmrRequestID").val(data.EMRRequestID);
-        $("#txtVendorName").val(data.VendorName);
-        $("#txtOfficeManagerName").val(data.OfficeManagerName);
-        $("#txtOfficeManagerEmail").val(data.OfficeManagerEmail);
-        $("#txtOfficeManagerPhone").val(data.OfficeManagerPhone);
-        $("#txtPhysicianName").val(data.PhysicianName);
-        $("#txtPhysicianSpecialty").val(data.PhysicianSpecialty);
-        $("#txtExpectedSpecimenCount").val(data.ExpectedSpecimenCount);
-        $("#lstHasCustomPanels").val(data.HasCustomPanels.toString());
-        $("#txtCustomPanels").val(data.CustomPanels);
-        $("#lstVendorID").val(data.VendorID);
-        $("#txtVendorContact").val(data.VendorContact);
-        $("#txtVendorPhone").val(data.VendorPhone);
-        $("#txtVendorFax").val(data.VendorFax);
-        $("#txtVendorEmail").val(data.VendorEmail);
-        $("#txtRequestedBy").val(data.RequestedBy);
-        $("#txtRequestStatus").val(data.Status);
-        $("#txtRequestedDate").val(data.RequestedDate);
-        $("#lstConnectionType").val(data.ConnectionType);
-        $("#txtProjectedLiveDate").val(moment(data.ProjectedLiveDate).format("YYYY-MMM-DD hh:mm:ss"));
-        $("#txtActualLiveDate").val(moment(data.ActualLiveDate).format("YYYY-MMM-DD hh:mm:ss"));
-        $("#ComtronTerminationDate").val(moment(data.ComtronTerminationDate).format("YYYY-MMM-DD hh:mm:ss"));
-        $("#VendorTerminationDate").val(moment(data.VendorTerminationDate).format("YYYY-MMM-DD hh:mm:ss"));
+        $("#txtSupplyOrderID").val(data.salesOrderID);
+        $("#lstOrderStatusID").val(data.salesOrderStatusID);
+        $("#lstDeliveryMethodID").val(data.deliveryMethodID);
 
+        $("#lstAccountID").empty();
+        $("#lstAccountID").append("<option value=''></option>");
+        for (let i = 0; i < data.accounts.length; i++) {
+            $("#lstAccountID").append("<option value='" + data.accounts[i].accountID + "'>" + data.accounts[i].accountID + " - " + data.accounts[i].name + "</option>")
+        }
+        $("#lstAccountID").val(data.accountID);
+
+        $("#lstSalesRep").val(data.salesRep);
+        $("#txtTrackingNumber").val(data.trackingNumber);
+
+        $("#lstDeliveryAddressID").empty();
+        $("#lstDeliveryAddressID").append("<option value=''>-selected address-</option>");
+        $("#lstDeliveryAddressID").append("<option value='-1'>New Delivery Adress</option>");
+        for (let i = 0; i < data.deliveryAddresses.length; i++) {
+            $("#lstDeliveryAddressID").append("<option value='" + data.deliveryAddresses[i].deliveryAddressID + "'>" + data.deliveryAddresses[i].deliveryAddressName+"</option>");
+        }
+        $("#lstDeliveryAddressID").val(data.deliveryAddressID);
+
+        //address
+        $("#txtDeliveryAddressName").val(data.deliveryAddress.deliveryAddressName);
+        $("#txtAddress").val(data.deliveryAddress.address);
+        $("#txtCity").val(data.deliveryAddress.city);
+        $("#txtSuite").val(data.deliveryAddress.suite);
+        $("#txtState").val(data.deliveryAddress.state);
+        $("#txtZip").val(data.deliveryAddress.zip);
+
+        //item tables 
+        $("#Items tr").remove();
+        for (let i = 0; i < data.orderLines.length; i++) {
+
+            $("#Items").append("<tr  salesorderlineid='" + data.orderLines[i].salesOrderLineID + "' itemid='" + data.orderLines[i].itemID + "'><td>" + data.orderLines[i].itemName + "</td><td><input class='form-control ordered-qty' value='" + data.orderLines[i].orderedQty + "' /></td><td><input value='" + data.orderLines[i].unitCost + "' class='form-control unit-cost'/></td><td>" + data.orderLines[i].itemDescription + "</td><td><input value='" + data.orderLines[i].committedQty + "' class='form-control committed-qty'/></td><td><input value='" + data.orderLines[i].cancelledQty + "' class='form-control cancelled-qty'/><td><input value='" + data.orderLines[i].backOrderedQty+"' class='form-control backordered-qty'/></td><td><button class='btn btn-danger item-del'>X</button></td><tr>")
+        }
+        $("#txtItemID").val("");
+        $("button.item-del").unbind("click").on("click", function (event) {
+            $(event.target).closest("tr").remove();
+        });
+
+        //
+        $("#txtOrderNote").val(data.orderNote);
+        $("#txtShippingNote").val(data.shippingNote);
+
+        $("#txtDateShipped").val(data.dateShipped);
+
+        $("#txtDateCreated").val(data.dateCreated);
+        $("#txtCreatedBy").val(data.createdBy);
+
+        $("#txtUpdatedDate").val(data.updatedDate);
+        $("#txtUpdatedBy").val(data.updatedBy);
+
+        $("#txtCompletedDate").val(data.completedDate);
     }
  
     function FormControlsDisable() {
 
-        $.each($("#frmEMRRequest input"), function (index, item) {
-            $(item).prop("disabled", true);
-        });
+        $("#frmSupplyOrders input").prop("disabled", true);
+        $("#frmSupplyOrders textarea").prop("disabled", true);
+        $("#frmSupplyOrders select").prop("disabled", true);
+        $("#frmSupplyOrders button").prop("disabled", true);
 
-        $.each($("#frmEMRRequest textarea"), function (index, item) {
-            $(item).prop("disabled", true);
-        });
-
-        $.each($("#frmEMRRequest select"), function (index, item) {
-            $(item).prop("disabled", true);
-        });
-
-        $("#btnSave").prop("disabled", true);
+        $("button.btn-close").prop("disabled", false);
+        $("button.close").prop("disabled", false);
 
     }
 
     function FormControlsEnable() {
 
-        $.each($("#frmEMRRequest form input"), function (index, item) {
-            $(item).prop("disabled", false);
-        });
+        $("#frmSupplyOrders input").prop("disabled", false);
+        $("#frmSupplyOrders textarea").prop("disabled", false);
+        $("#frmSupplyOrders select").prop("disabled", false);
+        $("#frmSupplyOrders button").prop("disabled", false);
 
-        $.each($("#frmEMRRequest form textarea"), function (index, item) {
-            $(item).prop("disabled", false);
-        });
+        $("#Items input").prop("disabled", false);
+        $("#Items textarea").prop("disabled", false);
+        $("#Items select").prop("disabled", false);
+        $("#Items button").prop("disabled", false);
 
-        $.each($("#frmEMRRequest form select"), function (index, item) {
-            $(item).prop("disabled", false);
-        });
+        $("button.btn-close").prop("disabled", false);
+        $("button.close").prop("disabled", false);
 
         $("#btnSave").prop("disabled", false);
 
@@ -220,100 +384,154 @@ $(function () {
     //clear control element
     function FormClear() {
 
-        $.each($("#frmEMRRequest form input"), function (index, item) {
+        $.each($("#frmSupplyOrders form input"), function (index, item) {
             $(item).val("");
         });
 
-        $.each($("#frmEMRRequest form textarea"), function (index, item) {
+        $.each($("#frmSupplyOrders form textarea"), function (index, item) {
             $(item).val("");
         });
 
-        $.each($("#frmEMRRequest form select"), function (index, item) {
+        $.each($("#frmSupplyOrders form select"), function (index, item) {
             $(item).val("");
         });
+
+        $("#lstDeliveryAddressID").empty();
+
+        $("#Items tr").remove();
 
     }
 
     //button Ok modal form
     $("#btnSave").click(function () {
 
-        let physIds = $("#tblPhysician tr.phys-row").map(function () {
-            return $(this).attr("data-id");
+        let supplyOrderID = $("#txtSupplyOrderID").val();
+        let orderStatusID = $("#lstOrderStatusID").val();
+        let deliveryMethodID = $("#lstDeliveryMethodID").val();
+        let accountID = $("#lstAccountID").val();
+        let deliveryAddressID = $("#lstDeliveryAddressID").val();
+        let deliveryAddressName = $("#txtDeliveryAddressName").val();
+        let address = $("#txtAddress").val();
+        let city = $("#txtCity").val();
+        let suite = $("#txtSuite").val();
+        let state = $("#txtState").val();
+        let zip = $("#txtZip").val();
+        let salesRep = $("#lstSalesRep").val();
+        let trackingNumber = $("#txtTrackingNumber").val();
+
+
+        //ordered lines
+        let orderLineIds = $("#Items tr").map(function () {
+            return $(this).attr("salesorderlineid");
         }).get();
 
-        let physNames = $("#tblPhysician tr.phys-row").map(function () {
-            return $(this).find("input.phys-name").val();
+        let itemIds = $("#Items tr").map(function () {
+            return $(this).attr("itemid");
         }).get();
 
-        let physNPIs = $("#tblPhysician tr.phys-row").map(function () {
-            return $(this).find("input.phys-npi").val();
+        let orderedQty = $("#Items input.ordered-qty").map(function () {
+            return $(this).val() == "" ? "0" : $(this).val();
         }).get();
 
+        let unitCost = $("#Items input.unit-cost").map(function () {
+            return $(this).val() == "" ? "0" : $(this).val();
+        }).get();
 
-        let EmrRequestID = $("#EmrRequestID").val();
-        let Status = $("#lstStatus").val();
-        let AccountID = $("#lstAccountID").val();
-        let VendorID = $("#lstVendorID").val();
-        let OfficeManagerName=$("#txtOfficeManagerName").val();
-        let OfficeManagerEmail=$("#txtOfficeManagerEmail").val();
-        let OfficeManagerPhone=$("#txtOfficeManagerPhone").val();
-        let PhysicianName=$("#txtPhysicianName").val();
-        let PhysicianSpecialty=$("#txtPhysicianSpecialty").val();
-        let ExpectedSpecimenCount=$("#txtExpectedSpecimenCount").val();
-        let HasCustomPanels=$("#lstHasCustomPanels").val()=="true";
-        let CustomPanels=$("#txtCustomPanels").val();
-        let VendorContact=$("#txtVendorContact").val();
-        let VendorPhone=$("#txtVendorPhone").val();
-        let VendorFax=$("#txtVendorFax").val();
-        let VendorEmail=$("#txtVendorEmail").val();
-        let ConnectionType = $("#lstConnectionType").val();
-        let ProjectedLiveDate = $("#txtProjectedLiveDate").val();
-        let ActualLiveDate = $("#txtActualLiveDate").val();
-        let ComtronTerminationDate = $("#ComtronTerminationDate").val();
-        let VendorTerminationDate = $("#VendorTerminationDate").val();
-        let ActionTaken = $("#txtActionTaken").val();
-        let Approve = $("#chkApprove").prop("checked");
+        let committedQty = $("#Items input.committed-qty").map(function () {
+            return $(this).val() == "" ? "0" : $(this).val();
+        }).get();
+
+        let cancelledQty = $("#Items input.cancelled-qty").map(function () {
+            return $(this).val() == "" ? "0":$(this).val();
+        }).get();
+
+        let backOrderedQty = $("#Items input.backordered-qty").map(function () {
+            return $(this).val() == "" ? "0" : $(this).val();
+        }).get();
+
+        let orderNote = $("#txtOrderNote").val();
+        let shippingNote = $("#txtShippingNote").val();
+        let dateShipped = $("#txtDateShipped").val();
 
 
         $.ajax({
-            url: "/EMRRequest/SaveEMRRequest",
+            url: "/Order/SaveSupplyOrder",
             method: "POST",
             dataType: "JSON",
             data: {
-                EmrRequestID: EmrRequestID,
-                Status: Status,
-                AccountID: AccountID,
-                VendorID: VendorID,
-                OfficeManagerName: OfficeManagerName,
-                OfficeManagerEmail: OfficeManagerEmail,
-                OfficeManagerPhone: OfficeManagerPhone,
-                PhysicianName: PhysicianName,
-                PhysicianSpecialty: PhysicianSpecialty,
-                ExpectedSpecimenCount: ExpectedSpecimenCount,
-                HasCustomPanels: HasCustomPanels,
-                CustomPanels: CustomPanels,
-                VendorContact: VendorContact,
-                VendorPhone: VendorPhone,
-                VendorFax: VendorFax,
-                VendorEmail: VendorEmail,
-                ConnectionType: ConnectionType,
-                ActionTaken: ActionTaken,
-                ProjectedLiveDate: ProjectedLiveDate,
-                ActualLiveDate: ActualLiveDate,
-                ComtronTerminationDate: ComtronTerminationDate,
-                VendorTerminationDate: VendorTerminationDate,
-                Approve: Approve
+                    supplyOrderID,
+                    orderStatusID,
+                    deliveryMethodID,
+                    accountID,
+                    deliveryAddressID,
+                    deliveryAddressName,
+                    address,
+                    city,
+                    suite,
+                    state,
+                    zip,
+                    orderLineIds,
+                    itemIds,
+                    orderedQty,
+                    unitCost,
+                    committedQty,
+                    cancelledQty,
+                    backOrderedQty,
+                    orderNote,
+                    shippingNote,
+                    dateShipped,
+                    salesRep,
+                    trackingNumber
             },
             success: function (data) {
                 if (data == "OK") {
-                    EMRRequestsList.ajax.reload();
-                    $("#frmEMRRequest").modal("hide");
+                    supplyOrdersList.ajax.reload();
+                    $("#frmSupplyOrders").modal("hide");
                     FormClear();
+                }
+            },
+            error: function (xhr, status, errorThrown) {
+                if (xhr.status == 403) {
+                    alert("Forbidden.You don't have permission for saving!");
                 }
             }
         });
     });
 
+    function openPDFOne(salesOrderID) {
+
+        $.ajax({
+            async: true,
+            url: '/order/PrintSalesOrder',
+            type: "POST",
+            data: {
+                id: salesOrderID
+            },
+            success: function (response) {
+                response = JSON.parse(response);
+                console.log(response);
+                let data = response.PDF;
+                let fileName = "SupplyOrder.pdf";
+                if (window.navigator && window.navigator.msSaveOrOpenBlob) { // IE workaround
+                    let byteCharacters = atob(data);
+                    let byteNumbers = new Array(byteCharacters.length);
+                    for (let i = 0; i < byteCharacters.length; i++) {
+                        byteNumbers[i] = byteCharacters.charCodeAt(i);
+                    }
+                    let byteArray = new Uint8Array(byteNumbers);
+                    let blob = new Blob([byteArray], { type: 'application/pdf' });
+                    window.navigator.msSaveOrOpenBlob(blob, fileName);
+                }
+                else { // much easier if not IE
+                    let pdfWindow = window.open("");
+                    pdfWindow.document.write('<iframe  width="100%" height="100%" src="data:application/pdf;base64, ' + response.PDF + '"></iframe>');
+                }
+            },
+            error: function (x, t, m) {
+                alert(t);
+            }
+        });
+    }
     //draggable
     $(".modal-dialog").draggable({
         handle: ".modal-header"

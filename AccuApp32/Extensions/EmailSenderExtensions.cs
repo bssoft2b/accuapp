@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
-using AccuApp.Services;
+using AccuApp32.Services;
 using SendGrid.Helpers.Mail;
 
-namespace AccuApp32MVC.Extensions
+namespace AccuApp32MVC.Services
 {
     public static class EmailSenderExtensions
     {

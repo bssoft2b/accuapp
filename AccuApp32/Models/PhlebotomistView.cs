@@ -17,8 +17,9 @@ namespace AccuApp32MVC.Models
         public string City { get; set; }
         public string Telephone { get; set; }
         public string Zip { get; set; }
-        public List<ValueName> PhlebotomistLeads { get; set; }
-        public List<ValueName> Leads { get; set; }
+        public int[] Leads { get; set; }
+        public DateTime? EmployeeStartDate { get; set; }
+        public DateTime? TerminationDate { get; set; }
         public List<PhlebotomistAssignmentLine> PhlebotomistAssignmentLines { get; set; }
     }
 }

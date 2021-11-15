@@ -2,9 +2,10 @@
 @{
     Layout = "~/Views/Shared/_LayoutAdminLte.cshtml";
 
+    var vendors=(Dictionary<int, string>)ViewBag.Vendors;
 }
 <style>
-    #tblSupplyOrders th {
+    #tblPurchaseOrders th {
         vertical-align:top;
         font-size:smaller;
         text-align:center;
@@ -12,371 +13,142 @@
         color:white;
     }
 
-    #tblSupplyOrders td {
+    #tblPurchaseOrders td {
         vertical-align:top;
         font-size:smaller;
     }
+
+    input.ordered-qty {
+        width:60px;
+    }
+    input.unit-cost {
+        width:80px;
+    }
+    input.tax-rate {
+        width:60px;
+    }
+    input.total-cost {
+        width:60px;
+    }
+    input.total-cost-sum {
+        width:120px;
+    }
+    input.received-qty {
+        width:60px;
+    }
+    input.backorder-qty {
+        width:60px;
+    }
+    input.cancelled-qty {
+        width:60px;
+    }
 </style>
 <!--Edit form-->
-<div class="modal fade" id="frmSupplyOrders" tabindex="-1" role="dialog" aria-labelledby="frmSupplyOrdersModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg" role="document">
+<div class="modal fade" id="frmPurchaseOrders" tabindex="-1" role="dialog" aria-labelledby="frmPurchaseOrdersModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="frmSupplyOrdersModalLabel">Create</h5>
+                <h5 class="modal-title" id="frmPurchaseOrdersModalLabel">Create</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-            <div class="modal-body">
+            <div class="modal-body ui-front">
                 <form method="post">
-                    <input type="hidden" id="txtStatus" />
-                    <input type="hidden" id="txtEmrRequestID" />
-                    <input type="hidden" id="txtRequestedBy" />
-                    <div class="form-group col-sm-8">
-                        <label for="lstAccountID" class="control-label">Account ID</label>
-                        <select id="lstAccountID" class="form-control" required>
-                            <option></option>
-                        </select>
-                        <input type="hidden" id="txtVendorName" />
+                    <div class="form-group row">
+                        <div class="col-sm-2">
+                            <label for="txtPurchaseOrderID" class="control-label">PurchaseOrderID</label>
+                            <input type="text" id="txtPurchaseOrderID" name="txtPurchaseOrderID" class="form-control" readonly/>
+                        </div>
+                        <div class="col-sm-2">
+                            <label for="txtInvoiceDate" class="control-label">InvoiceDate</label>
+                            <input type="text" id="txtInvoiceDate" name="txtInvoiceDate" class="form-control" readonly/>
+                        </div>
+                        <div class="col-sm-2">
+                            <label for="txtDateCreated" class="control-label">DateCreated</label>
+                            <input type="text" id="txtDateCreated" name="txtDateCreated" class="form-control" readonly/>
+                        </div>
+                        <div class="col-sm-2">
+                            <label for="txtDatePlaced" class="control-label">DatePlaced</label>
+                            <input type="text" id="txtDatePlaced" name="txtDatePlaced" class="form-control" readonly/>
+                        </div>
+                        <div class="col-sm-2">
+                            <label for="txtDateFulfilled" class="control-label">DateFulfilled</label>
+                            <input type="text" id="txtDateFulfilled" name="txtDateFulfilled" class="form-control" readonly/>
+                        </div>
                     </div>
                     <div class="form-group col-sm-8">
-                        <label for="txtOfficeManagerName" class="control-label">Office Manager Name</label>
-                        <input id="txtOfficeManagerName" class="form-control"  required />
-                    </div>
-                    <div class="form-group col-sm-8">
-                        <label for="txtOfficeManagerEmail" class="control-label">Office Manager Email</label>
-                        <input id="txtOfficeManagerEmail" class="form-control"  />
-                    </div>
-                    <div class="form-group col-sm-8">
-                        <label for="txtOfficeManagerPhone" class="control-label">Office Manager Phone</label>
-                        <input id="txtOfficeManagerPhone" class="form-control" required />
-                    </div>
-                    <div class="form-group col-sm-8">
-                        <label for="txtPhysicianName" class="control-label">Physician Name</label>
-                        <input id="txtPhysicianName" class="form-control" />
-                    </div>
-                    <div class="form-group col-sm-8">
-                        <label for="txtPhysicianSpecialty" class="control-label">Physician Specialty</label>
-                        <input id="txtPhysicianSpecialty" class="form-control" required />
-                    </div>
-                    <div class="form-group col-sm-8">
-                        <label for="txtExpectedSpecimenCount" class="control-label">Expected Specimen Count</label>
-                        <input id="txtExpectedSpecimenCount" class="form-control"  required />
-                    </div>
-                    <div class="form-group col-sm-8">
-                        <label for="lstHasCustomPanels" class="control-label">Has Custom Panels</label>
-                        <select id="lstHasCustomPanels" class="form-control" required>
-                            <option></option>
-                            <option value=true>Yes</option>
-                            <option value=false>No</option>
-                        </select>
-                    </div>
-                    <div class="form-group col-sm-8" style="display:none">
-                        <label for="txtCustomPanels" class="control-label">Custom Panels</label>
-                        <input id="txtCustomPanels" class="form-control" required />
-                    </div>
-                    <div class="form-group col-sm-8">
-                        <label for="lstVendorID" class="control-label">Vendor</label>
+                        <label for="lstVendorID" class="control-label">Vendor ID</label>
                         <select id="lstVendorID" class="form-control" required>
                             <option></option>
-                            <option value=-1>New Vendor</option>
+                            @foreach (var v in vendors)
+                            {
+                                <option value="@v.Key">@v.Key - @v.Value</option>
+                            }
                         </select>
                     </div>
                     <div class="form-group col-sm-8">
-                        <label for="txtVendorContact" class="control-label">Vendor Contract</label>
-                        <input id="txtVendorContact" class="form-control"  required />
-                    </div>
-                    <div class="form-group col-sm-8">
-                        <label for="txtVendorPhone" class="control-label">Vendor Phone</label>
-                        <input id="txtVendorPhone" class="form-control"  required />
-                    </div>
-                    <div class="form-group col-sm-8">
-                        <label for="txtVendorFax" class="control-label">Vendor Fax</label>
-                        <input id="txtVendorFax" class="form-control"  />
-                    </div>
-                    <div class="form-group col-sm-8">
-                        <label for="txtVendorEmail" class="control-label">Vendor Email</label>
-                        <input id="txtVendorEmail" class="form-control"  required />
-                    </div>
-                    <div class="form-group col-sm-8">
-                        <label for="lstConnectionType" class="control-label">Connection Type</label>
-                        <select id="lstConnectionType" class="form-control" required>
-                            <option></option>
-                            <option value="Uni-Directional">Uni-Directional</option>
-                            <option value="Bi-Directional"> Bi-Directional</option>
-                            <option value="Demographic Bridge">Demographic Bridge</option>
+                        <label for="lstItemID" class="control-label">Add item</label>
+                        <select id="lstItemID" name="lstItemID" class="form-control" placeholder="Enter part of item name, and select from lists...">
                         </select>
+                    </div>
+                    <div class="form-group col-sm-12">
+                        <table style="width:100%" id="tblItems">
+                            <thead>
+                                <tr>
+                                    <th class='vendoritem-id'>Item id</th>
+                                    <th class='vendoritem-name'>Item name</th>
+                                    <th class='ordered-qty'>QTY</th>
+                                    <th class='unit-cost'>UniCost</th>
+                                    <th class='tax-rate'>TaxRate</th>
+                                    <th class='total-cost'>TotalCost</th>
+                                    <th class='received-qty'>ReceivedQty</th>
+                                    <th class='backorder-qty'>BackOrderQty</th>
+                                    <th class='cancelled-qty'>CancelledQty</th>
+                                    <th class='average-usage'>AverageUsage</th>
+                                    <th class='last-order-date'>LastOrderDate</th>
+                                    <th class='last-order'>LastOrder</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody id="Items">
+                            </tbody>
+                            <tfooter>
+                                <tr>
+                                    <th colspan="4"></th>
+                                    <th colspan="1">Total Cost</th>
+                                    <th colspan="2"><input type="text" id="txtTotalCost" name="txtTotalCost" class='form-control total-cost-sum' readonly/></th>
+                                    <th colspan="6"></th>
+                                </tr>
+                            </tfooter>
+                        </table>
+                    </div>
+                    <div class="form-btn-group row">
+                        <div class="col-sm-4">
+                            <label for="txtShipTo" class="control-label">ShipTo</label>
+                            <input id="txtShipTo" class="form-control" />
+                        </div>
+                        <div class="col-sm-4">
+                            <label for="txtOrderNote" class="control-label">Order Note</label>
+                            <textarea id="txtOrderNote" class="form-control" rows="3"></textarea>
+                        </div>
+                        <div class="col-sm-4">
+                            <label for="txtMemo" class="control-label">Memo</label>
+                            <textarea id="txtMemo" class="form-control" rows="3"></textarea>
+                        </div>
                     </div>
                 </form>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                 <button type="button" id="btnSave" class="btn btn-primary">Save</button>
+                <button type="button" id="btnSave" class="btn btn-primary">Save and place order</button>
             </div>
         </div>
     </div>
 </div>
 <!--End edit form-->
 
-<!--Details-->
-<div class="modal fade" id="frmSupplyOrdersDetails" tabindex="-1" role="dialog" aria-labelledby="frmSupplyOrdersDetailsModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="frmSupplyOrdersDetailsModalLabel">Details</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <table class="table">
-                    <tr>
-                        <td>
-                            OfficeManagerName
-                        </td>
-                        <td>
-                            <label id="lblOfficeManagerName"></label> 
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            OfficeManagerEmail
-                        </td>
-                        <td>
-                            <label id="lblOfficeManagerEmail"></label> 
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            OfficeManagerPhone
-                        </td>
-                        <td>
-                            <label id="lblOfficeManagerPhone"></label> 
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            PhysicianName
-                        </td>
-                        <td>
-                            <label id="lblPhysicianName"></label> 
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            PhysicianSpecialty
-                        </td>
-                        <td>
-                            <label id="lblPhysicianSpecialty"></label> 
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            ExpectedSpecimenCount
-                        </td>
-                        <td>
-                            <label id="lblExpectedSpecimenCount"></label> 
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            CustomPanels
-                        </td>
-                        <td>
-                            <label id="lblCustomPanels"></label> 
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            Vendor
-                        </td>
-                        <td>
-                            <label id="lblVendor"></label> 
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            VendorContact
-                        </td>
-                        <td>
-                            <label id="lblVendorContact"></label> 
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            VendorPhone
-                        </td>
-                        <td>
-                            <label id="lblVendorPhone"></label> 
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            VendorFax
-                        </td>
-                        <td>
-                            <label id="lblVendorFax"></label> 
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            VendorEmail
-                        </td>
-                        <td>
-                            <label id="lblVendorEmail"></label> 
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            ConnectionType
-                        </td>
-                        <td>
-                            <label id="lblConnectionType"></label> 
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            RequestedBy
-                        </td>
-                        <td>
-                            <label id="lblRequestedBy"></label> 
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            RequestedDate
-                        </td>
-                        <td>
-                            <label id="lblRequestedDate"></label> 
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            VendorInstallationCost
-                        </td>
-                        <td>
-                            <label id="lblVendorInstallationCost"></label> 
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            VendorMaintenanceCost
-                        </td>
-                        <td>
-                            <label id="lblVendorMaintenanceCost"></label> 
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            VendorAnnualCost
-                        </td>
-                        <td>
-                            <label id="lblVendorAnnualCost"></label> 
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            ComtronInstallationCost
-                        </td>
-                        <td>
-                            <label id="lblComtronInstallationCost"></label> 
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            RequestStatus
-                        </td>
-                        <td>
-                            <label id="lblRequestStatus"></label> 
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            DenialReason
-                        </td>
-                        <td>
-                            <label id="lblDenialReason"></label> 
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            POSent
-                        </td>
-                        <td>
-                            <input id="chkPOSent" type="checkbox" class="disabled" disabled />
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            LISRequestSent
-                        </td>
-                        <td>
-                            <input id="chkLISRequestSent" type="checkbox" class="disabled" disabled />
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            ProjectedLiveDate
-                        </td>
-                        <td>
-                            <label id="lblProjectedLiveDate"></label> 
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            ActualLiveDate
-                        </td>
-                        <td>
-                            <label id="lblActualLiveDate"></label> 
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            ComtronTerminationDate
-                        </td>
-                        <td>
-                            <label id="lblComtronTerminationDate"></label> 
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            VendorTerminationDate
-                        </td>
-                        <td>
-                            <label id="lblVendorTerminationDate"></label> 
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            Account
-                        </td>
-                        <td>
-                            <label id="lblAccountID"></label> 
-                        </td>
-                    </tr>
-                </table>
-                <table class="table">
-                    <tr>
-                        <th>
-                            Action Taken
-                        </th>
-                        <th>
-                            Action By
-                        </th>
-                        <th>
-                            Action Date
-                        </th>
-                    </tr>
-                </table>      
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                <button type="button" id="btnSave" class="btn btn-primary">Save</button>
-            </div>
-        </div>
-    </div>
-</div>
-<!--end details-->
 Filter
 
 <br />
@@ -398,7 +170,7 @@ Filter
         </td>
     </tr>
 </table>
-<table id="tblSupplyOrders" class="table table-striped table-bordered dataTable">
+<table id="tblPurchaseOrders" class="table table-striped table-bordered dataTable">
     <thead>
         <tr>
             <th>Purchase Order ID</th>

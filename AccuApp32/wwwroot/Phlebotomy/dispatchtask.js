@@ -1,6 +1,43 @@
 ﻿var assignMentTable;
 $(function () {
 
+    function DisableFormsControls() {
+        $.each($("#editDispatchTask input"), function (index, item) {
+            $(item).prop("disabled", true);
+        });
+        $.each($("#editDispatchTask select"), function (index, item) {
+            $(item).prop("disabled", true);
+        });
+
+        $.each($("#editDispatchTask button"), function (index, item) {
+            $(item).prop("disabled", true);
+        });
+
+        $.each($("#editDispatchTask textarea"), function (index, item) {
+            $(item).prop("disabled", true);
+        });
+
+        $("button.btn-close").prop("disabled", false);
+    }
+
+    function EnableFormsControls() {
+        $.each($("#editDispatchTask input"), function (index, item) {
+            $(item).prop("disabled", false);
+        });
+        $.each($("#editDispatchTask select"), function (index, item) {
+            $(item).prop("disabled", false);
+        });
+
+        $.each($("#editDispatchTask button"), function (index, item) {
+            $(item).prop("disabled", false);
+        });
+
+        $.each($("#editDispatchTask textarea"), function (index, item) {
+            $(item).prop("disabled", false);
+        });
+
+    }
+
     function fillDispatchTaskEditForm(dispatchTaskId) {
 
         let response = $.ajax({
@@ -24,11 +61,6 @@ $(function () {
             $("#txtPickupTime").val(data.PickupTime);
             $("#chkStat").prop("checked", data.Stat);
 
-
-            $("#lstDispatchStatusID option").remove();
-            for (let i = 0; i < data.DispatchStatuses.length; i++) {
-                $("#lstDispatchStatusID").append("<option value='" + data.DispatchStatuses[i].Id + "'>" + data.DispatchStatuses[i].Name+"</li>");
-            }
             $("#lstDispatchStatusID").val(data.DispatchStatusID);
 
             $("#lstDispatchContactEmail li").remove();
@@ -40,39 +72,118 @@ $(function () {
             $("#editDispatchTask").modal("show");
         });
     }
-    function fillDispatchTaskDetailsForm(dispatchTaskId) {
 
-        let response = $.ajax({
-            method: "GET",
-            url: "/Phlebotomy/GetDispatchTask",
-            dataType: "JSON",
-            data: { dispatchTaskId: dispatchTaskId }
-        });
-
-        response.done(function (data) {
-
-            $("#lblDispatchTaskID").val(data.DispatchTaskID);
-            $("#lblAccountID").val(data.AccountID);
-            $("#lblAddressLine1").val(data.AddressLine1);
-            $("#lblAddressLine2").val(data.AddressLine2);
-            $("#lblCity").val(data.City);
-            $("#lblState").val(data.State);
-            $("#lblZip").val(data.Zip);
-            //$("#lblCallReason").val(data.ReasonID);
-            $("#lblDispatchStatusID").val(data.DispatchStatusID==1?"New":"Assigned");
-            $("#lblDriver").val(data.Driver);
-            $("#lblPickupTime").val(data.PickupTime);
-            $("#lblStat").prop("checked", data.Stat);
-
-            $("#lblDispatchContactEmail li").remove();
-            for (let i = 0; i < data.DispatchContactEmail.length; i++) {
-                $("#lblDispatchContactEmail").append("<li value='" + data.DispatchContactEmail[i].Id + "'>&nbsp;<input type='text' class='form-control' value='" + data.DispatchContactEmail[i].Email + "' readonly /></li>");
+    var validator=$("#frmDispatchTask").validate({
+        rules: {
+            txtAccountID: {
+                required:true
+            },
+            txtAddressLine1: {
+                required:true
+            },
+            txtCity: {
+                required:true
+            },
+            txtState: {
+                required:true
+            },
+            txtZip: {
+                required:true
             }
+        },
+        messages: {
+            txtAccountID: {
+                required: "This field required"
+            },
+            txtAddressLine1: {
+                required: "This field required"
+            },
+            txtCity: {
+                required: "This field required"
+            },
+            txtState: {
+                required: "This field required"
+            },
+            txtZip: {
+                required: "This field required"
+            }
+        }
+    });
 
-        }).then(function () {
-            $("#detailsDispatchTask").modal("show");
-        });
+    $("#txtAccountID").autocomplete({
+        source: function (request, response) {
+            $.ajax({
+                url: "/Phlebotomy/getaccounts",
+                dataType: "json",
+                method: "POST",
+                data: {
+                    filter: request.term
+                },
+                success: function (data) {
+                    response(data);
+                }
+            });
+        }, minLength: 2,
+        select: function (event, ui) {
+            $.ajax({
+                url: "/Phlebotomy/GetAccount",
+                dataType: "json",
+                method: "POST",
+                data: {
+                    accountid: ui.item.id
+                },
+                success: function (data) {
+
+                    $("#txtAccountID").val(data.AccountID);
+                    $("#txtAddressLine1").val(data.Address);
+                    $("#txtAddressLine2").val(data.Suite);
+                    $("#txtCity").val(data.City);
+                    $("#txtState").val(data.State);
+                    $("#txtZip").val(data.Zip);
+                }
+            });
+        }
+    });
+    $("#txtPickupTime").datetimepicker();
+
+    $("#editDispatchTask").on("hidden.bs.modal", function (event) {
+        $("#lstDispatchStatusID").prop("disabled", false);
+        validator.resetForm();
+        EnableFormsControls();
+    });
+
+    function ClearForm() {
+
+        $("#txtDispatchTaskID").val("");
+        $("#txtAccountID").val("");
+        $("#txtAddressLine1").val("");
+        $("#txtAddressLine2").val("");
+        $("#txtCity").val("");
+        $("#txtState").val("");
+        $("#txtZip").val("");
+        $("#lstCallReason").val("");
+        $("#txtDriver").val("");
+        $("#txtPickupTime").val("");
+        $("#chkStat").prop("checked",false);
+        $("#lstDispatchStatusID").val("");
+
+        $("#lstDispatchContactEmail li").remove();
+
     }
+
+    $("#btnCreate").click(function () {
+        ClearForm();
+
+        let currentDate = new Date();
+
+        $("#txtPickupTime").val(moment(currentDate).format("MMM Do YY h:mm:ss a"));
+        $("#lstDispatchStatusID").val(1);
+        $("#lstDispatchStatusID").prop("disabled",true);
+
+        $("#editDispatchTaskModalLabel").text("Create");
+        $("#editDispatchTask").modal("show");
+    });
+
     $("#btnRemoveDispatchContactEmail").click(function (event) {
         $.each($("#lstDispatchContactEmail input:checked"), function (index, element) {
             $(element).closest("li").remove();
@@ -83,12 +194,9 @@ $(function () {
         $("#lstDispatchContactEmail").append("<li value=''><input type='checkbox' />&nbsp;<input type='text' class='form-control' value='' /></li>");
     });
 
-
     $("#detailsDispatchTask").on("hidden.bs.modal", function () {
         assignMentTable.destroy();
     });
-
-
 
     var dispatchTasksList = $("#tblTasks").DataTable({
         dom: "lpfrtip",
@@ -143,7 +251,8 @@ $(function () {
         });
         $("#tblTasks button.btn-details").click(function (event) {
             let dispatchtaskId = $(event.target).closest("tr").attr("id");
-            fillDispatchTaskDetailsForm(dispatchtaskId);
+            fillDispatchTaskEditForm(dispatchtaskId);
+            DisableFormsControls();
         });
     });
 
@@ -163,12 +272,16 @@ $(function () {
             $("#lstPhlebotomistsLeads").append("<li value=" + v + "><input type='checkbox' />&nbsp;<span>" + n + "</span></li>");
 
     });
+
     $("#btnOk").click(function (event) {
+
+        if (!$("#frmDispatchTask").valid())
+            return false;
 
         let dispatchTaskID = $("#txtDispatchTaskID").val();
         let accountID = $("#txtAccountID").val();
         let Address1=$("#txtAddressLine1").val();
-        let Address2=$("#txtAddressLine2").val();
+        let Suite=$("#txtAddressLine2").val();
         let City=$("#txtCity").val();
         let State=$("#txtState").val();
         let Zip=$("#txtZip").val();
@@ -194,7 +307,7 @@ $(function () {
                 dispatchTaskID: dispatchTaskID,
                 accountID: accountID,
                 Address1: Address1,
-                Address2: Address2,
+                Address2: Suite,
                 City: City,
                 State: State,
                 Zip: Zip,
@@ -210,6 +323,7 @@ $(function () {
         response.done(function (data) {
             if (data == "OK")
                 $("#editDispatchTask").modal("hide");
+            dispatchTasksList.ajax.reload();
         });
     });
 

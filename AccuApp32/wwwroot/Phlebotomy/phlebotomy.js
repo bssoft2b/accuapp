@@ -1,6 +1,95 @@
 ﻿var assignMentTable;
 $(function () {
 
+    function chkExistID(v) {
+        if (!v.match("^[a-zA-Z0-9]*$")) {
+            $("#msgError").text("Only Alphabets and Numbers allowed.");
+        }
+        else {
+            let response = $.ajax({
+                method: "GET",
+                url: "/Phlebotomy/ExistsPhlebotomists",
+                dataType: "JSON",
+                data: { employeeId: v }
+            });
+            response.done(function (data) {
+                if (data)
+                    $("#msgError").text("This EmployeeID is exists.Choose another ID.");
+                else
+                    $("#msgError").text("");
+            });
+        }
+    }
+
+    $("#frmEmployer").validate({
+        rules: {
+            txtEmployeeID: {
+                required: true,
+            },
+            txtAddress1: {
+                required: true,
+           },
+            txtCity: {
+                required: true
+            },
+            txtState: {
+                required: true,
+                minlength: 2,
+                maxlength:2
+            },
+            txtZip: {
+                required: true,
+                minlength: 6,
+                maxlength: 6
+            },
+            txtTelephone: {
+                required: true
+            },
+            txtEmployeeStartDate: {
+                required: true
+            }
+        },
+        messages: {
+            txtEmployeeID: {
+                required:"Field required"
+            }, 
+            txtAddress1: {
+                required: "Field required"
+            },
+            txtCity: {
+                required: "Field required"
+            },
+            txtState: {
+                required: "Field required",
+                minlength: "Length is 2 symbols",
+                maxlength: "Length is 2 symbols"
+            },
+            txtZip: {
+                required: "Field required",
+                minlength: "Length is 6 symbols",
+                maxlength: "Length is 6 symbols"
+            },
+            txtEmployeeStartDate: {
+                required: "Field required"
+            },
+            txtTelephone: {
+                required: "Field required"
+            }
+        }
+    });
+
+    function setCheckEmployeeID() {
+        $("#txtEmployeeID").unbind("change").on("change", function (event) {
+            let v = $(event.target).val();
+            chkExistID(v);
+        });
+    }
+
+    $("#editPhlebotomist").on("hidden.bs.modal", function () {
+        $("#txtEmployeeID").unbind("keypress").unbind("change");
+        $("#txtEmployeeID").prop("disabled",false);
+    });
+
     function fillPhlebotomistEditForm(employeeId) {
 
         let response = $.ajax({
@@ -21,18 +110,10 @@ $(function () {
             $("#txtCity").val(data.City);
             $("#txtState").val(data.State);
             $("#txtZip").val(data.Zip);
+            $("#lstLeads").val(data.Leads).trigger("chosen:updated");
+            $("#txtEmployeeStartDate").val(moment(data.EmployeeStartDate).format("YYYY-MM-DD"));
+            $("#txtTerminationDate").val(moment(data.TerminationDate).format("YYYY-MM-DD"));
 
-            $("#lstLeads option").remove();
-
-            for (let i = 0; i < data.Leads.length; i++) {
-                $("#lstLeads").append("<option value=" + data.Leads[i].Id + ">" + data.Leads[i].Name + "</option>");
-            }
-
-            $("#lstPhlebotomistsLeads li").remove();
-
-            for (let i = 0; i < data.PhlebotomistLeads.length; i++) {
-                $("#lstPhlebotomistsLeads").append("<li value=" + data.PhlebotomistLeads[i].Id + "><input type='checkbox' />&nbsp;<span>" + data.PhlebotomistLeads[i].Name + "</span></li>");
-            }
         }).then(function () {
             $("#editPhlebotomist").modal("show");
         });
@@ -59,6 +140,8 @@ $(function () {
             $("#lblCity").text(data.City);
             $("#lblState").text(data.State);
             $("#lblZip").text(data.Zip);
+            $("#lblTerminationDate").text(data.TerminationDate);
+            $("#lblEmployeeStartDate").text(data.EmployeeStartDate);
 
             for(let i = 0; i <data.PhlebotomistAssignmentLines.length; i++) {
                 $("#PhlebotomistsDetails tbody").append("<tr><td>" + data.PhlebotomistAssignmentLines[i].AccountID + "</td><td>" + data.PhlebotomistAssignmentLines[i].GroupID + "</td><td>" + data.PhlebotomistAssignmentLines[i].PhlebotomistAssignmentID + "</td><td>" + data.PhlebotomistAssignmentLines[i].PhlebotomistAssignmentLineID + "</td><td>" + data.PhlebotomistAssignmentLines[i].Percentage);
@@ -69,10 +152,27 @@ $(function () {
         });
     }
 
+    function ClearForm() {
+        $.each($("#editPhlebotomist form input"), function (index, item) {
+            $(item).val("");
+        });
+        $("#lstLeads").val("").trigger("chosen:updated");
+    }
+
     $("#detailsPhlebotomist").on("hidden.bs.modal", function () {
         assignMentTable.destroy();
     });
 
+    $("#btnCreate").click(function () {
+        ClearForm();
+        setCheckEmployeeID();
+        $("#txtEmployeeID").prop("disabled", false);
+        $("#editPhlebotomistModalLabel").text("Create");
+        $("#editPhlebotomist").modal("show");
+    });
+
+    $("#lstLeads").chosen()
+    $("#lstLeads_chosen").css("width", "200px");
 
 
     var phlebotomistsList = $("#Phlebotomists").DataTable({
@@ -109,6 +209,7 @@ $(function () {
         $("#Phlebotomists button.btn-edit-user").click(function (event) {
             let phlebotomistId = $(event.target).closest("tr").attr("id");
             fillPhlebotomistEditForm(phlebotomistId);
+            $("#txtEmployeeID").prop("disabled", true);
         });
         $("#Phlebotomists button.btn-details-user").click(function (event) {
             let phlebotomistId = $(event.target).closest("tr").attr("id");
@@ -134,6 +235,10 @@ $(function () {
     });
     $("#btnOk").click(function (event) {
 
+        if (!$("#frmEmployer").valid()) {
+            return false;
+        }
+
         let employeeId = $("#txtEmployeeID").val();
         let LastName = $("#txtLastName").val();
         let FirstName = $("#txtFirstName").val();
@@ -143,8 +248,10 @@ $(function () {
         let City = $("#txtCity").val();
         let State = $("#txtState").val();
         let Zip = $("#txtZip").val();
+        let employeeStartDate = $("#txtEmployeeStartDate").val();
+        let terminationDate = $("#txtTerminationDate").val();
 
-        let phlebotomistsLead = $("#lstPhlebotomistsLeads li").map(function () {
+        let Leads = $("#lstLeads").map(function () {
             return $(this).val();
         }).get();
 
@@ -162,7 +269,9 @@ $(function () {
                 City: City,
                 State: State,
                 Zip: Zip,
-                phlebotomistsLead: phlebotomistsLead
+                Leads: Leads,
+                employeeStartDate: employeeStartDate,
+                terminationDate: terminationDate
             }
         });
 
